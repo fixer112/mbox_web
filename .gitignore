@@ -1,17 +1,30 @@
-/vendor/
-node_modules/
+/bootstrap/compiled.php
+.env.*.php
+.env.php
+/node_modules
+/public/hot
+/public/storage
+/public/uploads
+/storage/*.key
+/vendor
+/temp
+/.idea
+/.vscode
+/.vagrant
+Homestead.json
+Homestead.yaml
 npm-debug.log
 yarn-error.log
+.DS_Store
+.idea/
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
-
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
-storage/*.key
+updates/
+composer.lock
+*.lock
+resources/lang/en.json
 .env
-Homestead.yaml
-Homestead.json
-/.vagrant
+updates.zip
+ecommerce.zip
+install.zip
+/nbproject/private/
+/nbproject
