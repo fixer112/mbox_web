@@ -361,14 +361,12 @@
                             $products = \App\Product::whereIn('category_id', $category_ids)->get();
                             $qty = 0;
                             foreach ($products as $key => $product) {
-                                if ($product->variant_product) {
-                                    foreach ($product->stocks as $key => $stock) {
-                                        $qty += $stock->qty;
-                                    }
+                                
+                                foreach ($product->stocks as $key => $stock) {
+                                    $qty += $stock->qty;
                                 }
-                                else {
-                                    $qty = $product->current_stock;
-                                }
+                                
+                                
                             }
                         @endphp
                         {{ $qty }},

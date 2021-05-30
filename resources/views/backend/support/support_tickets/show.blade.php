@@ -10,7 +10,9 @@
                <div class="mt-2">
                    <span> {{ $ticket->user->name }} </span>
                    <span class="ml-2"> {{ $ticket->created_at }} </span>
-                   <span class="badge badge-inline badge-secondary ml-2"> {{ ucfirst($ticket->status) }} </span>
+                   <span class="badge badge-inline badge-secondary ml-2 text-capitalize"> 
+                       {{ translate($ticket->status) }} 
+                   </span>
                </div>
             </div>
         </div>
@@ -36,7 +38,14 @@
                     </div>
                 </div>
                 <div class="form-group mb-0 text-right">
-                    <button type="submit" class="btn btn-sm btn-dark" onclick="submit_reply('pending')">{{ translate('Submit as') }} <strong>{{ ucfirst($ticket->status) }}</strong></button>
+                    <button type="submit" class="btn btn-sm btn-dark" onclick="submit_reply('pending')">
+                        {{ translate('Submit as') }} 
+                        <strong>
+                            <span class="text-capitalize"> 
+                                {{ translate($ticket->status) }}
+                            </span>
+                        </strong>
+                    </button>
                     <button type="submit" class="btn btn-icon btn-sm btn-dark" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"><i class="las la-angle-down"></i></button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a class="dropdown-item" href="#" onclick="submit_reply('open')">{{ translate('Submit as') }} <strong>{{ translate('Open') }}</strong></a>

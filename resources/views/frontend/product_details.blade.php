@@ -30,7 +30,7 @@
     <meta property="og:description" content="{{ $detailedProduct->meta_description }}" />
     <meta property="og:site_name" content="{{ get_setting('meta_title') }}" />
     <meta property="og:price:amount" content="{{ single_price($detailedProduct->unit_price) }}" />
-    <meta property="product:price:currency" content="{{ \App\Currency::findOrFail(\App\BusinessSetting::where('type', 'system_default_currency')->first()->value)->code }}" />
+    <meta property="product:price:currency" content="{{ \App\Currency::findOrFail(get_setting('system_default_currency'))->code }}" />
     <meta property="fb:app_id" content="{{ env('FACEBOOK_PIXEL_ID') }}">
 @endsection
 
@@ -46,6 +46,16 @@
                             @endphp
                             <div class="col order-1 order-md-2">
                                 <div class="aiz-carousel product-gallery" data-nav-for='.product-gallery-thumb' data-fade='true' data-auto-height='true'>
+                                    @foreach ($photos as $key => $photo)
+                                        <div class="carousel-box img-zoom rounded">
+                                            <img
+                                                class="img-fluid lazyload"
+                                                src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                                                data-src="{{ uploaded_asset($photo) }}"
+                                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
+                                            >
+                                        </div>
+                                    @endforeach
                                     @foreach ($detailedProduct->stocks as $key => $stock)
                                         @if ($stock->image != null)
                                             <div class="carousel-box img-zoom rounded">
@@ -58,20 +68,20 @@
                                             </div>
                                         @endif
                                     @endforeach
-                                    @foreach ($photos as $key => $photo)
-                                        <div class="carousel-box img-zoom rounded">
-                                            <img
-                                                class="img-fluid lazyload"
-                                                src="{{ static_asset('assets/img/placeholder.jpg') }}"
-                                                data-src="{{ uploaded_asset($photo) }}"
-                                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
-                                            >
-                                        </div>
-                                    @endforeach
                                 </div>
                             </div>
                             <div class="col-12 col-md-auto w-md-80px order-2 order-md-1 mt-3 mt-md-0">
                                 <div class="aiz-carousel product-gallery-thumb" data-items='5' data-nav-for='.product-gallery' data-vertical='true' data-vertical-sm='false' data-focus-select='true' data-arrows='true'>
+                                    @foreach ($photos as $key => $photo)
+                                    <div class="carousel-box c-pointer border p-1 rounded">
+                                        <img
+                                            class="lazyload mw-100 size-50px mx-auto"
+                                            src="{{ static_asset('assets/img/placeholder.jpg') }}"
+                                            data-src="{{ uploaded_asset($photo) }}"
+                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
+                                        >
+                                    </div>
+                                    @endforeach
                                     @foreach ($detailedProduct->stocks as $key => $stock)
                                         @if ($stock->image != null)
                                             <div class="carousel-box c-pointer border p-1 rounded" data-variation="{{ $stock->variant }}">
@@ -83,16 +93,6 @@
                                                 >
                                             </div>
                                         @endif
-                                    @endforeach
-                                    @foreach ($photos as $key => $photo)
-                                    <div class="carousel-box c-pointer border p-1 rounded">
-                                        <img
-                                            class="lazyload mw-100 size-50px mx-auto"
-                                            src="{{ static_asset('assets/img/placeholder.jpg') }}"
-                                            data-src="{{ uploaded_asset($photo) }}"
-                                            onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
-                                        >
-                                    </div>
                                     @endforeach
                                 </div>
                             </div>
@@ -119,13 +119,8 @@
                                 <div class="col-6 text-right">
                                     @php
                                         $qty = 0;
-                                        if($detailedProduct->variant_product){
-                                            foreach ($detailedProduct->stocks as $key => $stock) {
-                                                $qty += $stock->qty;
-                                            }
-                                        }
-                                        else{
-                                            $qty = $detailedProduct->current_stock;
+                                        foreach ($detailedProduct->stocks as $key => $stock) {
+                                            $qty += $stock->qty;
                                         }
                                     @endphp
                                     @if ($qty > 0)
@@ -134,12 +129,11 @@
                                         <span class="badge badge-md badge-inline badge-pill badge-danger">{{ translate('Out of stock')}}</span>
                                     @endif
                                 </div>
+                                @if ($detailedProduct->est_shipping_days)
                                 <div class="col-auto">
-                                    <small class="mr-2 opacity-50">{{ translate('Estimate Shipping Time')}}: </small>
-                                    @if ($detailedProduct->est_shipping_days)
-                                        {{ $detailedProduct->est_shipping_days }} {{  translate('Days') }}
-                                    @endif
+                                    <small class="mr-2 opacity-50">{{ translate('Estimate Shipping Time')}}: </small>{{ $detailedProduct->est_shipping_days }} {{  translate('Days') }}
                                 </div>
+                                @endif
                             </div>
 
                             <hr>
@@ -147,15 +141,15 @@
                             <div class="row align-items-center">
                                 <div class="col-auto">
                                     <small class="mr-2 opacity-50">{{ translate('Sold by')}}: </small><br>
-                                    @if ($detailedProduct->added_by == 'seller' && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+                                    @if ($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1)
                                         <a href="{{ route('shop.visit', $detailedProduct->user->shop->slug) }}" class="text-reset">{{ $detailedProduct->user->shop->name }}</a>
                                     @else
                                         {{  translate('Inhouse product') }}
                                     @endif
                                 </div>
-                                @if (\App\BusinessSetting::where('type', 'conversation_system')->first()->value == 1)
+                                @if (get_setting('conversation_system') == 1)
                                     <div class="col-auto">
-                                        <button class="btn btn-sm btn-soft-primary" onclick="show_chat_modal()">{{ translate('Custom Order')}}</button>
+                                        <button class="btn btn-sm btn-soft-primary" onclick="show_chat_modal()">{{ translate('Message Seller')}}</button>
                                     </div>
                                 @endif
 
@@ -307,7 +301,7 @@
                                                 <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="minus" data-field="quantity" disabled="">
                                                     <i class="las la-minus"></i>
                                                 </button>
-                                                <input type="text" name="quantity" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $detailedProduct->min_qty }}" min="{{ $detailedProduct->min_qty }}" max="10" readonly>
+                                                <input type="number" name="quantity" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $detailedProduct->min_qty }}" min="{{ $detailedProduct->min_qty }}" max="10">
                                                 <button class="btn  col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="plus" data-field="quantity">
                                                     <i class="las la-plus"></i>
                                                 </button>
@@ -427,7 +421,7 @@
                 <div class="col-xl-3 order-1 order-xl-0">
                     <div class="bg-white shadow-sm mb-3">
                         <div class="position-relative p-3 text-left">
-                            @if ($detailedProduct->added_by == 'seller' && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1 && $detailedProduct->user->seller->verification_status == 1)
+                            @if ($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1 && $detailedProduct->user->seller->verification_status == 1)
                                 <div class="absolute-top-right p-2 bg-white z-1">
                                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" viewBox="0 0 287.5 442.2" width="22" height="34">
                                         <polygon style="fill:#F8B517;" points="223.4,442.2 143.8,376.7 64.1,442.2 64.1,215.3 223.4,215.3 "/>
@@ -439,7 +433,7 @@
                                 </div>
                             @endif
                             <div class="opacity-50 fs-12 border-bottom">{{ translate('Sold By')}}</div>
-                            @if($detailedProduct->added_by == 'seller' && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+                            @if($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1)
                                 <a href="{{ route('shop.visit', $detailedProduct->user->shop->slug) }}" class="text-reset d-block fw-600">
                                     {{ $detailedProduct->user->shop->name }}
                                     @if ($detailedProduct->user->seller->verification_status == 1)
@@ -472,7 +466,7 @@
                                 <div class="opacity-60 fs-12">({{ $total }} {{ translate('customer reviews')}})</div>
                             </div>
                         </div>
-                        @if($detailedProduct->added_by == 'seller' && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+                        @if($detailedProduct->added_by == 'seller' && get_setting('vendor_system_activation') == 1)
                             <div class="row no-gutters align-items-center border-top">
                                 <div class="col">
                                     <a href="{{ route('shop.visit', $detailedProduct->user->shop->slug) }}" class="d-block btn btn-soft-primary rounded-0">{{ translate('Visit Store')}}</a>
@@ -558,7 +552,7 @@
                         <div class="tab-content pt-0">
                             <div class="tab-pane fade active show" id="tab_default_1">
                                 <div class="p-4">
-                                    <div class="mw-100 overflow-hidden text-left">
+                                    <div class="mw-100 overflow-hidden text-left aiz-editor-data">
                                         <?php echo $detailedProduct->getTranslation('description'); ?>
                                     </div>
                                 </div>
@@ -667,7 +661,7 @@
                                                         <label class="opacity-60">{{ translate('Rating')}}</label>
                                                         <div class="rating rating-input">
                                                             <label>
-                                                                <input type="radio" name="rating" value="1">
+                                                                <input type="radio" name="rating" value="1" required>
                                                                 <i class="las la-star"></i>
                                                             </label>
                                                             <label>
@@ -785,55 +779,6 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" onclick="show_model_of_custom_button()" class="btn btn-outline-light fw-600" data-dismiss="modal">{{ translate('Custom order')}}</button>
-                        <button type="button" class="btn btn-outline-primary fw-600" data-dismiss="modal">{{ translate('Cancel')}}</button>
-                        <button type="submit" class="btn btn-primary fw-600">{{ translate('Send')}}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-                                              <!--custom order model -->
-     <div class="modal fade" id="customorder_model" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-zoom product-modal" id="modal-size" role="document">
-            <div class="modal-content position-relative">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-600 h5">{{ translate('Your Custom Order')}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form class="" action="{{URL::to('/customordermsg')}}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    
-                    <input type="hidden" name="product_id" value="{{ $detailedProduct->id }}">
-                      @if(Auth::check())
-                     <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
-                      <input type="hidden" name="user_name" value="{{ Auth::user()->name }}">
-                        <input type="hidden" name="product_slug" value="{{ route('product', $detailedProduct->slug) }}">
-                    
-                        @if ($detailedProduct->added_by == 'seller' && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
-                                     <input type="hidden" name="vendor_id" value="{{ $detailedProduct->user->shop->user_id }}">
-                            @endif
-                      
-                      @endif
-                    <div class="modal-body gry-bg px-3 pt-3">
-                        <div class="form-group">
-                             <label >Product Name</label>
-                            <input type="text" class="form-control mb-3" name="product_name" value="{{ $detailedProduct->name }}" placeholder="{{ translate('Product Name') }}"  readonly required>
-                        </div>
-                        <div class="form-group">
-                             <label >Quantity</label>
-                            <input min=1 type="number" class="form-control mb-3" name="quanity" value="1" placeholder="Enter Quantity"  required>
-                        </div>
-                          <div class="form-group">
-                             <label >Lets Bargain</label>
-                            <input  type="number" class="form-control mb-3" name="offer_price" placeholder="Enter your Price"  required>
-                        </div>
-                        
-                    </div>
-                    <div class="modal-footer">
-                   
                         <button type="button" class="btn btn-outline-primary fw-600" data-dismiss="modal">{{ translate('Cancel')}}</button>
                         <button type="submit" class="btn btn-primary fw-600">{{ translate('Send')}}</button>
                     </div>
@@ -893,26 +838,28 @@
                             <p class="text-muted mb-0">{{ translate('Dont have an account?')}}</p>
                             <a href="{{ route('user.registration') }}">{{ translate('Register Now')}}</a>
                         </div>
-                        @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                        @if(get_setting('google_login') == 1 || 
+                            get_setting('facebook_login') == 1 || 
+                            get_setting('twitter_login') == 1)
                             <div class="separator mb-3">
                                 <span class="bg-white px-3 opacity-60">{{ translate('Or Login With')}}</span>
                             </div>
                             <ul class="list-inline social colored text-center mb-5">
-                                @if (\App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1)
+                                @if (get_setting('facebook_login') == 1)
                                     <li class="list-inline-item">
                                         <a href="{{ route('social.login', ['provider' => 'facebook']) }}" class="facebook">
                                             <i class="lab la-facebook-f"></i>
                                         </a>
                                     </li>
                                 @endif
-                                @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1)
+                                @if(get_setting('google_login') == 1)
                                     <li class="list-inline-item">
                                         <a href="{{ route('social.login', ['provider' => 'google']) }}" class="google">
                                             <i class="lab la-google"></i>
                                         </a>
                                     </li>
                                 @endif
-                                @if (\App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                                @if (get_setting('twitter_login') == 1)
                                     <li class="list-inline-item">
                                         <a href="{{ route('social.login', ['provider' => 'twitter']) }}" class="twitter">
                                             <i class="lab la-twitter"></i>
@@ -966,14 +913,6 @@
         function show_chat_modal(){
             @if (Auth::check())
                 $('#chat_modal').modal('show');
-            @else
-                $('#login_modal').modal('show');
-            @endif
-        }
-        
-          function show_model_of_custom_button(){
-            @if (Auth::check())
-                $('#customorder_model').modal('show');
             @else
                 $('#login_modal').modal('show');
             @endif

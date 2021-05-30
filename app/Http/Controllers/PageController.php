@@ -159,4 +159,11 @@ class PageController extends Controller
         }
         abort(404);
     }
+    public function mobile_custom_page($slug){
+        $page = Page::where('slug', $slug)->first();
+        if($page != null){
+            return view('frontend.m_custom_page', compact('page'));
+        }
+        abort(404);
+    }
 }

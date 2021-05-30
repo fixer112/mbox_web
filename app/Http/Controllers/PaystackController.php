@@ -21,7 +21,8 @@ class PaystackController extends Controller
     {
         if(Session::get('payment_type') == 'cart_payment'){
             $order = Order::findOrFail(Session::get('order_id'));
-            $request->email = $request->session()->get('shipping_info')['email'];
+            $user = Auth::user();
+            $request->email = $user->email;
             $request->amount = round($order->grand_total * 100);
             $request->currency = env('PAYSTACK_CURRENCY_CODE', 'NGN');
             $request->reference = Paystack::genTranxRef();

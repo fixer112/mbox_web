@@ -239,7 +239,7 @@ class CustomerPackageController extends Controller
         $customer_package->payment_details = $request->trx_id;
         $customer_package->approval = 0;
         $customer_package->offline_payment = 1;
-        $customer_package->reciept = $request->photo;
+        $customer_package->reciept = ($request->photo == null) ? '' : $request->photo;
         $customer_package->save();
         flash(translate('Offline payment has been done. Please wait for response.'))->success();
         return redirect()->route('customer_products.index');

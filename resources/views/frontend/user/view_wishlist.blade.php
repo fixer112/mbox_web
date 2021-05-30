@@ -10,7 +10,7 @@
     </div>
 
     <div class="row gutters-5">
-        @foreach ($wishlists as $key => $wishlist)
+        @forelse ($wishlists as $key => $wishlist)
             @if ($wishlist->product != null)
                 <div class="col-xxl-3 col-xl-4 col-lg-3 col-md-4 col-sm-6" id="wishlist_{{ $wishlist->id }}">
                     <div class="card mb-2 shadow-sm">
@@ -43,7 +43,14 @@
                     </div>
                 </div>
             @endif
-        @endforeach
+        @empty
+            <div class="col">
+                <div class="text-center bg-white p-4 rounded shadow">
+                    <img class="mw-100 h-200px" src="{{ static_asset('assets/img/nothing.svg') }}" alt="Image">
+                    <h5 class="mb-0 h5 mt-3">{{ translate("There isn't anything added yet")}}</h5>
+                </div>
+            </div>
+        @endforelse
     </div>
     <div class="aiz-pagination">
         {{ $wishlists->links() }}

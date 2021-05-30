@@ -10,31 +10,31 @@
                     <div class="col active">
                         <div class="text-center text-primary">
                             <i class="la-3x mb-2 las la-shopping-cart"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block text-capitalize">{{ translate('1. My Cart')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart')}}</h3>
                         </div>
                     </div>
                     <div class="col">
                         <div class="text-center">
                             <i class="la-3x mb-2 opacity-50 las la-map"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50 text-capitalize">{{ translate('2. Shipping info')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('2. Shipping info')}}</h3>
                         </div>
                     </div>
                     <div class="col">
                         <div class="text-center">
                             <i class="la-3x mb-2 opacity-50 las la-truck"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50 text-capitalize">{{ translate('3. Delivery info')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('3. Delivery info')}}</h3>
                         </div>
                     </div>
                     <div class="col">
                         <div class="text-center">
                             <i class="la-3x mb-2 opacity-50 las la-credit-card"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50 text-capitalize">{{ translate('4. Payment')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('4. Payment')}}</h3>
                         </div>
                     </div>
                     <div class="col">
                         <div class="text-center">
                             <i class="la-3x mb-2 opacity-50 las la-check-circle"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50 text-capitalize">{{ translate('5. Confirmation')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('5. Confirmation')}}</h3>
                         </div>
                     </div>
                 </div>
@@ -45,10 +45,8 @@
 
 <section class="mb-4" id="cart-summary">
     <div class="container">
-        @php
-            $cart =  App\Models\Cart::where('user_id',  Auth::id())->orderBy('created_at', 'desc')->get()
-        @endphp
-        @if( $cart && count($cart) > 0 )
+        {{-- @if( Session::has('cart') && count(Session::get('cart')) > 0 ) --}}
+        @if( $carts && count($carts) > 0 )
             <div class="row">
                 <div class="col-xxl-8 col-xl-10 mx-auto">
                     <div class="shadow-sm bg-white p-3 p-lg-4 rounded text-left">
@@ -65,25 +63,23 @@
                                 @php
                                 $total = 0;
                                 @endphp
-                                @foreach (($cart) as $key => $cartItem)
-                              
+                                @foreach ($carts as $key => $cartItem)
                                     @php
-                                    $product = \App\Product::find($cartItem->product_id);
-                                    $total = $total + $cartItem->price*$cartItem->quantity;
-                                    $product_name_with_choice = $product ? $product->getTranslation('name') : '';
-                                    if ($cartItem->variation != null) {
-                                        $product_name_with_choice = $product ? $product->getTranslation('name') : ''.' - '.$cartItem->variation;
+                                    $product = \App\Product::find($cartItem['product_id']);
+                                    $total = $total + ($cartItem['price'] * $cartItem['quantity']) + $cartItem['tax'];
+                                    $product_name_with_choice = $product->getTranslation('name');
+                                    if ($cartItem['variation'] != null) {
+                                        $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variation'];
                                     }
                                     @endphp
-                               
                                     <li class="list-group-item px-0 px-lg-3">
                                         <div class="row gutters-5">
                                             <div class="col-lg-5 d-flex">
-                                                 <span class="mr-2 ml-0">
+                                                <span class="mr-2 ml-0">
                                                     <img
-                                                       src="{{ uploaded_asset($product ? $product->thumbnail_img : '') }}"
+                                                        src="{{ uploaded_asset($product->thumbnail_img) }}"
                                                         class="img-fit size-60px rounded"
-                                                        alt="{{ $product ? $product->getTranslation('name') : '' }}"
+                                                        alt="{{  $product->getTranslation('name')  }}"
                                                     >
                                                 </span>
                                                 <span class="fs-14 opacity-60">{{ $product_name_with_choice }}</span>
@@ -91,21 +87,21 @@
 
                                             <div class="col-lg col-4 order-1 order-lg-0 my-3 my-lg-0">
                                                 <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Price')}}</span>
-                                                <span class="fw-600 fs-16">{{ single_price($cartItem->price) }}</span>
+                                                <span class="fw-600 fs-16">{{ single_price($cartItem['price']) }}</span>
                                             </div>
                                             <div class="col-lg col-4 order-2 order-lg-0 my-3 my-lg-0">
                                                 <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Tax')}}</span>
-                                                <span class="fw-600 fs-16">{{ single_price($cartItem->tax) }}</span>
+                                                <span class="fw-600 fs-16">{{ single_price($cartItem['tax']) }}</span>
                                             </div>
 
                                             <div class="col-lg col-6 order-4 order-lg-0">
-                                                @if($cartItem->digital != 1)
+                                                @if($cartItem['digital'] != 1)
                                                     <div class="row no-gutters align-items-center aiz-plus-minus mr-2 ml-0">
-                                                        <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="minus" data-field="quantity[{{ $key }}]">
+                                                        <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="minus" data-field="quantity[{{ $cartItem['id'] }}]">
                                                             <i class="las la-minus"></i>
                                                         </button>
-                                                        <input type="text" name="quantity[{{ $key }}]" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $cartItem->quantity }}" min="1" max="10" readonly onchange="updateQuantity({{ $key }}, this)">
-                                                        <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="plus" data-field="quantity[{{ $key }}]">
+                                                        <input type="number" name="quantity[{{ $cartItem['id'] }}]" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $cartItem['quantity'] }}" min="1" max="10" onchange="updateQuantity({{ $cartItem['id'] }}, this)">
+                                                        <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="plus" data-field="quantity[{{ $cartItem['id'] }}]">
                                                             <i class="las la-plus"></i>
                                                         </button>
                                                     </div>
@@ -113,10 +109,10 @@
                                             </div>
                                             <div class="col-lg col-4 order-3 order-lg-0 my-3 my-lg-0">
                                                 <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Total')}}</span>
-                                                <span class="fw-600 fs-16 text-primary">{{ single_price(($cartItem->price+$cartItem->tax)*$cartItem->quantity) }}</span>
+                                                <span class="fw-600 fs-16 text-primary">{{ single_price(($cartItem['price'] + $cartItem['tax']) * $cartItem['quantity']) }}</span>
                                             </div>
                                             <div class="col-lg-auto col-6 order-5 order-lg-0 text-right">
-                                                <a href="javascript:void(0)" onclick="removeFromCartView(event, {{ $cartItem->id }})" class="btn btn-icon btn-sm btn-soft-primary btn-circle">
+                                                <a href="javascript:void(0)" onclick="removeFromCartView(event, {{ $cartItem['id'] }})" class="btn btn-icon btn-sm btn-soft-primary btn-circle">
                                                     <i class="las la-trash"></i>
                                                 </a>
                                             </div>
@@ -139,7 +135,9 @@
                             </div>
                             <div class="col-md-6 text-center text-md-right">
                                 @if(Auth::check())
-                                    <a href="{{ route('checkout.shipping_info') }}" class="btn btn-primary fw-600">{{ translate('Continue to Shipping')}}</a>
+                                    <a href="{{ route('checkout.shipping_info') }}" class="btn btn-primary fw-600">
+                                        {{ translate('Continue to Shipping')}}
+                                    </a>
                                 @else
                                     <button class="btn btn-primary fw-600" onclick="showCheckoutModal()">{{ translate('Continue to Shipping')}}</button>
                                 @endif
@@ -217,26 +215,26 @@
                         <p class="text-muted mb-0">{{ translate('Dont have an account?')}}</p>
                         <a href="{{ route('user.registration') }}">{{ translate('Register Now')}}</a>
                     </div>
-                    @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                    @if(get_setting('google_login') == 1 || get_setting('facebook_login') == 1 || get_setting('twitter_login') == 1)
                         <div class="separator mb-3">
                             <span class="bg-white px-3 opacity-60">{{ translate('Or Login With')}}</span>
                         </div>
                         <ul class="list-inline social colored text-center mb-3">
-                            @if (\App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1)
+                            @if (get_setting('facebook_login') == 1)
                                 <li class="list-inline-item">
                                     <a href="{{ route('social.login', ['provider' => 'facebook']) }}" class="facebook">
                                         <i class="lab la-facebook-f"></i>
                                     </a>
                                 </li>
                             @endif
-                            @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1)
+                            @if(get_setting('google_login') == 1)
                                 <li class="list-inline-item">
                                     <a href="{{ route('social.login', ['provider' => 'google']) }}" class="google">
                                         <i class="lab la-google"></i>
                                     </a>
                                 </li>
                             @endif
-                            @if (\App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                            @if (get_setting('twitter_login') == 1)
                                 <li class="list-inline-item">
                                     <a href="{{ route('social.login', ['provider' => 'twitter']) }}" class="twitter">
                                         <i class="lab la-twitter"></i>
@@ -253,20 +251,24 @@
 
 @section('script')
     <script type="text/javascript">
-    function removeFromCartView(e, key){
-        e.preventDefault();
-        removeFromCart(key);
-    }
+        function removeFromCartView(e, key){
+            e.preventDefault();
+            removeFromCart(key);
+        }
 
-    function updateQuantity(key, element){
-        $.post('{{ route('cart.updateQuantity') }}', { _token:'{{ csrf_token() }}', key:key, quantity: element.value}, function(data){
-            updateNavCart();
-            $('#cart-summary').html(data);
-        });
-    }
+        function updateQuantity(key, element){
+            $.post('{{ route('cart.updateQuantity') }}', { 
+                _token   :  '{{ csrf_token() }}', 
+                id       :  key, 
+                quantity :  element.value
+            }, function(data){
+                updateNavCart();
+                $('#cart-summary').html(data);
+            });
+        }
 
-    function showCheckoutModal(){
-        $('#GuestCheckout').modal();
-    }
+        function showCheckoutModal(){
+            $('#GuestCheckout').modal();
+        }
     </script>
 @endsection

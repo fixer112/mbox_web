@@ -25,7 +25,7 @@ class NewsletterController extends Controller
                 foreach ($request->user_emails as $key => $email) {
                     $array['view'] = 'emails.newsletter';
                     $array['subject'] = $request->subject;
-                    $array['from'] = env('MAIL_USERNAME');
+                    $array['from'] = env('MAIL_FROM_ADDRESS');
                     $array['content'] = $request->content;
 
                     try {
@@ -41,7 +41,7 @@ class NewsletterController extends Controller
                 foreach ($request->subscriber_emails as $key => $email) {
                     $array['view'] = 'emails.newsletter';
                     $array['subject'] = $request->subject;
-                    $array['from'] = env('MAIL_USERNAME');
+                    $array['from'] = env('MAIL_FROM_ADDRESS');
                     $array['content'] = $request->content;
 
                     try {
@@ -64,7 +64,7 @@ class NewsletterController extends Controller
     public function testEmail(Request $request){
         $array['view'] = 'emails.newsletter';
         $array['subject'] = "SMTP Test";
-        $array['from'] = env('MAIL_USERNAME');
+        $array['from'] = env('MAIL_FROM_ADDRESS');
         $array['content'] = "This is a test email.";
 
         try {

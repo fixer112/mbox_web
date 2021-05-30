@@ -17,7 +17,7 @@ class PurchaseHistoryDetailCollection extends ResourceCollection
                     'tax' => $data->tax,
                     'shipping_cost' => $data->shipping_cost,
                     'coupon_discount' => $data->coupon_discount,
-                    'quantity' => $data->quantity,
+                    'quantity' => (int) $data->quantity,
                     'payment_status' => $data->payment_status,
                     'delivery_status' => $data->delivery_status
                 ];

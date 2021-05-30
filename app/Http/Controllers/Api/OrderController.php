@@ -140,7 +140,7 @@ class OrderController extends Controller
             try {
                 $array['view'] = 'emails.invoice';
                 $array['subject'] = translate('Your order has been placed').' - '.$order->code;
-                $array['from'] = env('MAIL_USERNAME');
+                $array['from'] = env('MAIL_FROM_ADDRESS');
                 $array['order'] = $order;
 
                 Mail::to(User::where('user_type', 'admin')->first()->email)->queue(new InvoiceEmailManager($array));

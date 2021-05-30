@@ -52,7 +52,7 @@
                               <td>{{ $info->value }}</td>
                           @elseif ($info->type == 'multi_select')
                               <td>
-                                  {{ implode(json_decode($info->value), ', ') }}
+                                  {{ implode(', ', json_decode($info->value)) }}
                               </td>
                           @elseif ($info->type == 'file')
                               <td>

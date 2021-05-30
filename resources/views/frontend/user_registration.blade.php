@@ -68,7 +68,7 @@
                                             <input type="password" class="form-control" placeholder="{{  translate('Confirm Password') }}" name="password_confirmation">
                                         </div>
 
-                                        @if(\App\BusinessSetting::where('type', 'google_recaptcha')->first()->value == 1)
+                                        @if(get_setting('google_recaptcha') == 1)
                                             <div class="form-group">
                                                 <div class="g-recaptcha" data-sitekey="{{ env('CAPTCHA_KEY') }}"></div>
                                             </div>
@@ -86,26 +86,26 @@
                                             <button type="submit" class="btn btn-primary btn-block fw-600">{{  translate('Create Account') }}</button>
                                         </div>
                                     </form>
-                                    @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                                    @if(get_setting('google_login') == 1 || get_setting('facebook_login') == 1 || get_setting('twitter_login') == 1)
                                         <div class="separator mb-3">
                                             <span class="bg-white px-3 opacity-60">{{ translate('Or Join With')}}</span>
                                         </div>
                                         <ul class="list-inline social colored text-center mb-5">
-                                            @if (\App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1)
+                                            @if (get_setting('facebook_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'facebook']) }}" class="facebook">
                                                         <i class="lab la-facebook-f"></i>
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1)
+                                            @if(get_setting('google_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'google']) }}" class="google">
                                                         <i class="lab la-google"></i>
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if (\App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                                            @if (get_setting('twitter_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'twitter']) }}" class="twitter">
                                                         <i class="lab la-twitter"></i>
@@ -131,13 +131,13 @@
 
 
 @section('script')
-    @if(\App\BusinessSetting::where('type', 'google_recaptcha')->first()->value == 1)
+    @if(get_setting('google_recaptcha') == 1)
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     @endif
 
     <script type="text/javascript">
 
-        @if(\App\BusinessSetting::where('type', 'google_recaptcha')->first()->value == 1)
+        @if(get_setting('google_recaptcha') == 1)
         // making the CAPTCHA  a required field for form submission
         $(document).ready(function(){
             // alert('helloman');

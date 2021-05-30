@@ -25,7 +25,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
            'unit_price'    => $row['unit_price'],
            'purchase_price'    => $row['purchase_price'] == null ? $row['unit_price'] : $row['purchase_price'],
            'unit'    => $row['unit'],
-           'current_stock' => $row['current_stock'],
+//           'current_stock' => $row['current_stock'],
            'meta_title' => $row['meta_title'],
            'meta_description' => $row['meta_description'],
            'colors' => json_encode(array()),

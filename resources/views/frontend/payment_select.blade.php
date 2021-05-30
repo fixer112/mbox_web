@@ -9,31 +9,31 @@
                     <div class="col done">
                         <div class="text-center text-success">
                             <i class="la-3x mb-2 las la-shopping-cart"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block text-capitalize">{{ translate('1. My Cart')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('1. My Cart')}}</h3>
                         </div>
                     </div>
                     <div class="col done">
                         <div class="text-center text-success">
                             <i class="la-3x mb-2 las la-map"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block text-capitalize">{{ translate('2. Shipping info')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('2. Shipping info')}}</h3>
                         </div>
                     </div>
                     <div class="col done">
                         <div class="text-center text-success">
                             <i class="la-3x mb-2 las la-truck"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block text-capitalize">{{ translate('3. Delivery info')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('3. Delivery info')}}</h3>
                         </div>
                     </div>
                     <div class="col active">
                         <div class="text-center text-primary">
                             <i class="la-3x mb-2 las la-credit-card"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block text-capitalize">{{ translate('4. Payment')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block">{{ translate('4. Payment')}}</h3>
                         </div>
                     </div>
                     <div class="col">
                         <div class="text-center">
                             <i class="la-3x mb-2 opacity-50 las la-check-circle"></i>
-                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50 text-capitalize">{{ translate('5. Confirmation')}}</h3>
+                            <h3 class="fs-14 fw-600 d-none d-lg-block opacity-50">{{ translate('5. Confirmation')}}</h3>
                         </div>
                     </div>
                 </div>
@@ -47,6 +47,8 @@
             <div class="col-lg-8">
                 <form action="{{ route('payment.checkout') }}" class="form-default" role="form" method="POST" id="checkout-form">
                     @csrf
+                    <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
+                    
                     <div class="card shadow-sm border-0 rounded">
                         <div class="card-header p-3">
                             <h3 class="fs-16 fw-600 mb-0">
@@ -57,7 +59,7 @@
                             <div class="row">
                                 <div class="col-xxl-8 col-xl-10 mx-auto">
                                     <div class="row gutters-10">
-                                        @if(\App\BusinessSetting::where('type', 'paypal_payment')->first()->value == 1)
+                                        @if(get_setting('paypal_payment') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="paypal" class="online_payment" type="radio" name="payment_option" checked>
@@ -70,7 +72,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'stripe_payment')->first()->value == 1)
+                                        @if(get_setting('stripe_payment') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="stripe" class="online_payment" type="radio" name="payment_option" checked>
@@ -83,7 +85,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'sslcommerz_payment')->first()->value == 1)
+                                        @if(get_setting('sslcommerz_payment') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="sslcommerz" class="online_payment" type="radio" name="payment_option" checked>
@@ -96,7 +98,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'instamojo_payment')->first()->value == 1)
+                                        @if(get_setting('instamojo_payment') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="instamojo" class="online_payment" type="radio" name="payment_option" checked>
@@ -109,7 +111,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'razorpay')->first()->value == 1)
+                                        @if(get_setting('razorpay') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="razorpay" class="online_payment" type="radio" name="payment_option" checked>
@@ -122,7 +124,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'paystack')->first()->value == 1)
+                                        @if(get_setting('paystack') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="paystack" class="online_payment" type="radio" name="payment_option" checked>
@@ -135,7 +137,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'voguepay')->first()->value == 1)
+                                        @if(get_setting('voguepay') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="voguepay" class="online_payment" type="radio" name="payment_option" checked>
@@ -148,7 +150,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'payhere')->first()->value == 1)
+                                        @if(get_setting('payhere') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="payhere" class="online_payment" type="radio" name="payment_option" checked>
@@ -161,7 +163,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'ngenius')->first()->value == 1)
+                                        @if(get_setting('ngenius') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="ngenius" class="online_payment" type="radio" name="payment_option" checked>
@@ -174,7 +176,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'iyzico')->first()->value == 1)
+                                        @if(get_setting('iyzico') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="iyzico" class="online_payment" type="radio" name="payment_option" checked>
@@ -187,7 +189,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'nagad')->first()->value == 1)
+                                        @if(get_setting('nagad') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="nagad" class="online_payment" type="radio" name="payment_option" checked>
@@ -200,7 +202,7 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'bkash')->first()->value == 1)
+                                        @if(get_setting('bkash') == 1)
                                             <div class="col-6 col-md-4">
                                                 <label class="aiz-megabox d-block mb-3">
                                                     <input value="bkash" class="online_payment" type="radio" name="payment_option" checked>
@@ -214,7 +216,7 @@
                                             </div>
                                         @endif
                                         @if(\App\Addon::where('unique_identifier', 'african_pg')->first() != null && \App\Addon::where('unique_identifier', 'african_pg')->first()->activated)
-                                            @if(\App\BusinessSetting::where('type', 'mpesa')->first()->value == 1)
+                                            @if(get_setting('mpesa') == 1)
                                                 <div class="col-6 col-md-4">
                                                     <label class="aiz-megabox d-block mb-3">
                                                         <input value="mpesa" class="online_payment" type="radio" name="payment_option" checked>
@@ -227,7 +229,7 @@
                                                     </label>
                                                 </div>
                                             @endif
-                                            @if(\App\BusinessSetting::where('type', 'flutterwave')->first()->value == 1)
+                                            @if(get_setting('flutterwave') == 1)
                                                 <div class="col-6 col-md-4">
                                                     <label class="aiz-megabox d-block mb-3">
                                                         <input value="flutterwave" class="online_payment" type="radio" name="payment_option" checked>
@@ -240,7 +242,7 @@
                                                     </label>
                                                 </div>
                                             @endif
-                                            @if(\App\BusinessSetting::where('type', 'payfast')->first()->value == 1)
+                                            @if(get_setting('payfast') == 1)
                                                 <div class="col-6 col-md-4">
                                                     <label class="aiz-megabox d-block mb-3">
                                                         <input value="payfast" class="online_payment" type="radio" name="payment_option" checked>
@@ -267,15 +269,16 @@
                                                 </label>
                                             </div>
                                         @endif
-                                        @if(\App\BusinessSetting::where('type', 'cash_payment')->first()->value == 1)
+                                        @if(get_setting('cash_payment') == 1)
                                             @php
                                                 $digital = 0;
                                                 $cod_on = 1;
-                                                foreach(Session::get('cart') as $cartItem){
+                                                foreach($carts as $cartItem){
+                                                    $product = \App\Product::find($cartItem['product_id']);
                                                     if($cartItem['digital'] == 1){
                                                         $digital = 1;
                                                     }
-                                                    if($cartItem['cash_on_delivery'] == 0){
+                                                    if($product['cash_on_delivery'] == 0){
                                                         $cod_on = 0;
                                                     }
                                                 }
@@ -335,7 +338,7 @@
                                     </div>
                                 </div>
                             @endif
-                            @if (Auth::check() && \App\BusinessSetting::where('type', 'wallet_system')->first()->value == 1)
+                            @if (Auth::check() && get_setting('wallet_system') == 1)
                                 <div class="separator mb-3">
                                     <span class="bg-white px-3">
                                         <span class="opacity-60">{{ translate('Or')}}</span>
@@ -347,9 +350,13 @@
                                         <span class="fw-600">{{ single_price(Auth::user()->balance) }}</span>
                                     </div>
                                     @if(Auth::user()->balance < $total)
-                                        <button type="button" class="btn btn-secondary" disabled>{{ translate('Insufficient balance')}}</button>
+                                        <button type="button" class="btn btn-secondary" disabled>
+                                            {{ translate('Insufficient balance')}}
+                                        </button>
                                     @else
-                                        <button  type="button" onclick="use_wallet()" class="btn btn-primary fw-600">{{ translate('Pay with wallet')}}</button>
+                                        <button  type="button" onclick="use_wallet()" class="btn btn-primary fw-600">
+                                            {{ translate('Pay with wallet')}}
+                                        </button>
                                     @endif
                                 </div>
                             @endif
@@ -380,7 +387,7 @@
                 </form>
             </div>
 
-            <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="col-lg-4 mt-4 mt-lg-0" id="cart_summary">
                 @include('frontend.partials.cart_summary')
             </div>
         </div>
@@ -422,5 +429,45 @@
                 $('#manual_payment_description').html($('#manual_payment_info_'+id).html());
             }
         }
+        
+        $(document).on("click", "#coupon-apply",function() {
+            var data = new FormData($('#apply-coupon-form')[0]);
+            
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: "POST",
+                url: "{{route('checkout.apply_coupon_code')}}",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    AIZ.plugins.notify(data.response_message.response, data.response_message.message);
+                    console.log(data.response_message);
+                    $("#cart_summary").html(data.html);
+                }
+            })
+        });
+        
+        $(document).on("click", "#coupon-remove",function() {
+            var data = new FormData($('#remove-coupon-form')[0]);
+            
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: "POST",
+                url: "{{route('checkout.remove_coupon_code')}}",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    $("#cart_summary").html(data);
+                }
+            })
+        })
     </script>
 @endsection

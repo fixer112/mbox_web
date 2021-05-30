@@ -28,7 +28,7 @@ class ProductsExport implements FromCollection, WithMapping, WithHeadings
             'unit_price',
             'purchase_price',
             'unit',
-            'current_stock',
+//            'current_stock',
             'meta_title',
             'meta_description',
         ];
@@ -50,7 +50,7 @@ class ProductsExport implements FromCollection, WithMapping, WithHeadings
             $product->unit_price,
             $product->purchase_price,
             $product->unit,
-            $product->current_stock,
+//            $product->current_stock,
         ];
     }
 }

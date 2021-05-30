@@ -31,7 +31,7 @@ class ProductDetailCollection extends ResourceCollection
                     'main_price' => home_discounted_base_price($data->id),
                     'calculable_price' => (double) homeDiscountedBasePrice($data->id),
                     'currency_symbol' => currency_symbol(),
-                    'current_stock' => (integer) $data->current_stock,
+                    'current_stock' => (integer) $data->stocks->first()->qty,
                     'unit' => $data->unit,
                     'rating' => (double) $data->rating,
                     'rating_count' => (integer) Review::where(['product_id' => $data->id])->count(),

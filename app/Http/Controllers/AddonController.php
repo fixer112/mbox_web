@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Addon;
-use App\Menu;
-use Illuminate\Http\Request;
-use ZipArchive;
-use DB;
-use Auth;
 use App\BusinessSetting;
-use CoreComponentRepository;
+use DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Storage;
+use ZipArchive;
 
 class AddonController extends Controller
 {
@@ -22,7 +19,7 @@ class AddonController extends Controller
      */
     public function index()
     {
-        CoreComponentRepository::instantiateShopRepository();
+        //CoreComponentRepository::instantiateShopRepository();
         return view('backend.addons.index');
     }
 
@@ -54,8 +51,9 @@ class AddonController extends Controller
             if ($request->hasFile('addon_zip')) {
                 // Create update directory.
                 $dir = 'addons';
-                if (!is_dir($dir))
+                if (!is_dir($dir)) {
                     mkdir($dir, 0777, true);
+                }
 
                 $path = Storage::disk('local')->put('addons', $request->addon_zip);
 
@@ -165,8 +163,7 @@ class AddonController extends Controller
                     return redirect()->route('addons.index');
                 }
             }
-        }
-        else {
+        } else {
             flash(translate('Please enable ZipArchive extension.'))->error();
         }
     }
@@ -182,8 +179,7 @@ class AddonController extends Controller
         //
     }
 
-    public function list()
-    {
+    function list() {
         //return view('backend.'.Auth::user()->role.'.addon.list')->render();
     }
 

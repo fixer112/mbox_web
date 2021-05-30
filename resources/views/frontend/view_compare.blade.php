@@ -57,7 +57,12 @@
                                 <tr>
                                     <th scope="row">{{ translate('Price')}}</th>
                                     @foreach (Session::get('compare') as $key => $item)
-                                        <td>{{ single_price(\App\Product::find($item)->unit_price) }}</td>
+                                        <td>
+                                            @if(home_base_price($item) != home_discounted_base_price($item))
+                                                <del class="fw-600 opacity-50 mr-1">{{ home_base_price($item) }}</del>
+                                            @endif
+                                            <span class="fw-700 text-primary">{{ home_discounted_base_price($item) }}</span>
+                                        </td>
                                     @endforeach
                                 </tr>
                                 <tr>

@@ -41,83 +41,95 @@ class InstamojoController extends Controller
            if(Session::get('payment_type') == 'cart_payment'){
                $order = Order::findOrFail(Session::get('order_id'));
 
-                  if(preg_match_all('/^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$/im', Session::get('shipping_info')['phone'])){
+               if(preg_match_all('/^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$/im', Auth::user()->phone)) {
                     try {
                         $response = $api->paymentRequestCreate(array(
                             "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
                             "amount" => round($order->grand_total),
-                            "buyer_name" => Session::get('shipping_info')['name'],
                             "send_email" => false,
-                            "email" => Session::get('shipping_info')['email'],
-                            "phone" => Session::get('shipping_info')['phone'],
+//                            "buyer_name" => Session::get('shipping_info')['name'],
+//                            "email" => Session::get('shipping_info')['email'],
+//                            "phone" => Session::get('shipping_info')['phone'],
+                            "email" => Auth::user()->email,
+                            "phone" => Auth::user()->phone,
                             "redirect_url" => url('instamojo/payment/pay-success')
                         ));
 
                         return redirect($response['longurl']);
-
-                    }catch (Exception $e) {
+                    } catch (Exception $e) {
                         print('Error: ' . $e->getMessage());
                     }
-                  }
-                  else{
-                      flash(translate('Invalid phone number'))->error();
-                      return redirect()->route('checkout.shipping_info');
-                  }
-           }
+                } else {
+                    flash(translate('Invalid phone number'))->error();
+                    return redirect()->route('checkout.shipping_info');
+                }
+            }
            elseif (Session::get('payment_type') == 'wallet_payment') {
-                  try {
-                      $response = $api->paymentRequestCreate(array(
-                          "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
-                          "amount" => round(Session::get('payment_data')['amount']),
-                          "send_email" => false,
-                          "email" => Auth::user()->email,
-                          "phone" => Auth::user()->phone,
-                          "redirect_url" => url('instamojo/payment/pay-success')
-                          ));
+                if (preg_match_all('/^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$/im', Auth::user()->phone)) {
+                    try {
+                        $response = $api->paymentRequestCreate(array(
+                            "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
+                            "amount" => round(Session::get('payment_data')['amount']),
+                            "send_email" => false,
+                            "email" => Auth::user()->email,
+                            "phone" => Auth::user()->phone,
+                            "redirect_url" => url('instamojo/payment/pay-success')
+                        ));
 
-                          return redirect($response['longurl']);
-
-                  }catch (Exception $e) {
-                      return back();
-                  }
-           }
+                        return redirect($response['longurl']);
+                    } catch (Exception $e) {
+                        return back();
+                    }
+                } else {
+                    flash(translate('Invalid phone number'))->error();
+                    return redirect()->route('checkout.shipping_info');
+                }
+            }
            elseif (Session::get('payment_type') == 'customer_package_payment') {
-               $customer_package = CustomerPackage::findOrFail(Session::get('payment_data')['customer_package_id']);
-               try {
-                  $response = $api->paymentRequestCreate(array(
-                      "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
-                      "amount" => round($customer_package->amount),
-                      "send_email" => false,
-                      "email" => Auth::user()->email,
-                      "phone" => Auth::user()->phone,
-                      "redirect_url" => url('instamojo/payment/pay-success')
-                      ));
+                $customer_package = CustomerPackage::findOrFail(Session::get('payment_data')['customer_package_id']);
+                if (preg_match_all('/^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$/im', Auth::user()->phone)) {
+                    try {
+                        $response = $api->paymentRequestCreate(array(
+                            "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
+                            "amount" => round($customer_package->amount),
+                            "send_email" => false,
+                            "email" => Auth::user()->email,
+                            "phone" => Auth::user()->phone,
+                            "redirect_url" => url('instamojo/payment/pay-success')
+                        ));
 
-                      return redirect($response['longurl']);
-
-              }catch (Exception $e) {
-                  return back();
-              }
-           }
+                        return redirect($response['longurl']);
+                    } catch (Exception $e) {
+                        return back();
+                    }
+                } else {
+                    flash(translate('Invalid phone number'))->error();
+                    return redirect()->route('checkout.shipping_info');
+                }
+            }
            elseif (Session::get('payment_type') == 'seller_package_payment') {
-               $seller_package = SellerPackage::findOrFail(Session::get('payment_data')['seller_package_id']);
-               try {
-                  $response = $api->paymentRequestCreate(array(
-                      "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
-                      "amount" => round($seller_package->amount),
-                      "send_email" => false,
-                      "email" => Auth::user()->email,
-                      "phone" => Auth::user()->phone,
-                      "redirect_url" => url('instamojo/payment/pay-success')
-                      ));
+                $seller_package = SellerPackage::findOrFail(Session::get('payment_data')['seller_package_id']);
+                if (preg_match_all('/^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$/im', Auth::user()->phone)) {
+                    try {
+                        $response = $api->paymentRequestCreate(array(
+                            "purpose" => ucfirst(str_replace('_', ' ', Session::get('payment_type'))),
+                            "amount" => round($seller_package->amount),
+                            "send_email" => false,
+                            "email" => Auth::user()->email,
+                            "phone" => Auth::user()->phone,
+                            "redirect_url" => url('instamojo/payment/pay-success')
+                        ));
 
-                      return redirect($response['longurl']);
-
-              }catch (Exception $e) {
-                  return back();
-              }
-           }
-       }
+                        return redirect($response['longurl']);
+                    } catch (Exception $e) {
+                        return back();
+                    }
+                } else {
+                    flash(translate('Invalid phone number'))->error();
+                    return redirect()->route('checkout.shipping_info');
+                }
+            }
+        }
  }
 
 // success response method.

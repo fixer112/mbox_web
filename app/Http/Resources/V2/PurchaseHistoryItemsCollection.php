@@ -18,7 +18,7 @@ class PurchaseHistoryItemsCollection extends ResourceCollection
                     'tax' => format_price($data->tax),
                     'shipping_cost' =>format_price($data->shipping_cost),
                     'coupon_discount' => format_price($data->coupon_discount),
-                    'quantity' => $data->quantity,
+                    'quantity' => (int) $data->quantity,
                     'payment_status' => $data->payment_status,
                     'payment_status_string' => ucwords(str_replace('_', ' ', $data->payment_status)),
                     'delivery_status' => $data->delivery_status,

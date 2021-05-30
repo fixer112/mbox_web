@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Order;
+use App\ProductStock;
 use Illuminate\Http\Request;
 use DB;
 use Schema;
@@ -40,7 +42,7 @@ class DemoController extends Controller
 
     public function cron_1()
     {
-        if(env('DEMO_MODE') != 'On'){
+        if (env('DEMO_MODE') != 'On') {
             return back();
         }
         $this->drop_all_tables();
@@ -49,7 +51,7 @@ class DemoController extends Controller
 
     public function cron_2()
     {
-        if(env('DEMO_MODE') != 'On'){
+        if (env('DEMO_MODE') != 'On') {
             return back();
         }
         $this->remove_folder();
@@ -57,17 +59,17 @@ class DemoController extends Controller
     }
 
 
-
     public function drop_all_tables()
     {
         Schema::disableForeignKeyConstraints();
-        foreach(DB::select('SHOW TABLES') as $table) {
+        foreach (DB::select('SHOW TABLES') as $table) {
             $table_array = get_object_vars($table);
             Schema::drop($table_array[key($table_array)]);
         }
     }
 
-    public function import_demo_sql() {
+    public function import_demo_sql()
+    {
         $sql_path = base_path('demo.sql');
         DB::unprepared(file_get_contents($sql_path));
     }
@@ -85,7 +87,8 @@ class DemoController extends Controller
         File::deleteDirectory(base_path('public/uploads'));
     }
 
-    public function convertTaxes(){
+    public function convertTaxes()
+    {
         $tax = Tax::first();
 
         foreach (Product::all() as $product) {
@@ -98,42 +101,43 @@ class DemoController extends Controller
         }
     }
 
-    public function convert_assets(Request $request){
+    public function convert_assets(Request $request)
+    {
         $type = array(
-            "jpg"=>"image",
-            "jpeg"=>"image",
-            "png"=>"image",
-            "svg"=>"image",
-            "webp"=>"image",
-            "gif"=>"image",
-            "mp4"=>"video",
-            "mpg"=>"video",
-            "mpeg"=>"video",
-            "webm"=>"video",
-            "ogg"=>"video",
-            "avi"=>"video",
-            "mov"=>"video",
-            "flv"=>"video",
-            "swf"=>"video",
-            "mkv"=>"video",
-            "wmv"=>"video",
-            "wma"=>"audio",
-            "aac"=>"audio",
-            "wav"=>"audio",
-            "mp3"=>"audio",
-            "zip"=>"archive",
-            "rar"=>"archive",
-            "7z"=>"archive",
-            "doc"=>"document",
-            "txt"=>"document",
-            "docx"=>"document",
-            "pdf"=>"document",
-            "csv"=>"document",
-            "xml"=>"document",
-            "ods"=>"document",
-            "xlr"=>"document",
-            "xls"=>"document",
-            "xlsx"=>"document"
+            "jpg" => "image",
+            "jpeg" => "image",
+            "png" => "image",
+            "svg" => "image",
+            "webp" => "image",
+            "gif" => "image",
+            "mp4" => "video",
+            "mpg" => "video",
+            "mpeg" => "video",
+            "webm" => "video",
+            "ogg" => "video",
+            "avi" => "video",
+            "mov" => "video",
+            "flv" => "video",
+            "swf" => "video",
+            "mkv" => "video",
+            "wmv" => "video",
+            "wma" => "audio",
+            "aac" => "audio",
+            "wav" => "audio",
+            "mp3" => "audio",
+            "zip" => "archive",
+            "rar" => "archive",
+            "7z" => "archive",
+            "doc" => "document",
+            "txt" => "document",
+            "docx" => "document",
+            "pdf" => "document",
+            "csv" => "document",
+            "xml" => "document",
+            "ods" => "document",
+            "xlr" => "document",
+            "xls" => "document",
+            "xlsx" => "document"
         );
         // foreach (Banner::all() as $key => $banner) {
         //     if ($banner->photo != null) {
@@ -409,7 +413,8 @@ class DemoController extends Controller
         // }
     }
 
-    public function convert_category(){
+    public function convert_category()
+    {
         foreach (SubCategory::all() as $key => $value) {
             $category = new Category;
             $parent = Category::find($value->category_id);
@@ -465,33 +470,29 @@ class DemoController extends Controller
         }
 
         foreach (Product::all() as $key => $value) {
-            try{
+            try {
                 if ($value->subsubcategory_id == null) {
                     $value->category_id = Category::where('name', SubCategory::find($value->subcategory_id)->name)->first()->id;
                     $value->save();
-                }
-                else {
+                } else {
                     $value->category_id = Category::where('name', SubSubCategory::find($value->subsubcategory_id)->name)->first()->id;
                     $value->save();
                 }
-            }
-            catch(\Exception $e){
+            } catch (\Exception $e) {
 
             }
         }
 
         foreach (CustomerProduct::all() as $key => $value) {
-            try{
+            try {
                 if ($value->subsubcategory_id == null) {
                     $value->category_id = Category::where('name', SubCategory::find($value->subcategory_id)->name)->first()->id;
                     $value->save();
-                }
-                else {
+                } else {
                     $value->category_id = Category::where('name', SubSubCategory::find($value->subsubcategory_id)->name)->first()->id;
                     $value->save();
                 }
-            }
-            catch(\Exception $e){
+            } catch (\Exception $e) {
 
             }
         }
@@ -506,5 +507,48 @@ class DemoController extends Controller
         //         $product->save();
         //     }
         // }
+    }
+
+    public function insert_product_variant_forcefully($id_min, $id_max)
+    {
+        $products = Product::where('id', '>=', $id_min)->where('id', '<=', $id_max)->get();
+
+        foreach ($products as $product) {
+            $this->insert_product_variant_forcefully_for_a_product($product);
+        }
+
+    }
+
+    public function insert_product_variant_forcefully_for_a_product($product)
+    {
+        if ($product->stocks->isEmpty()) {
+            $product_stock = new ProductStock;
+            $product_stock->product_id = $product->id;
+            $product_stock->variant = '';
+            $product_stock->price = $product->unit_price;
+            $product_stock->sku = $product->sku;
+            $product_stock->qty = $product->current_stock;
+            $product_stock->save();
+        }
+    }
+
+
+    public function update_seller_id_in_orders($id_min, $id_max)
+    {
+        $orders = Order::where('id', '>=', $id_min)->where('id', '<=', $id_max)->get();
+
+        foreach ($orders as $order) {
+            $this->update_seller_id_in_order($order);
+        }
+
+    }
+
+    public function update_seller_id_in_order($order)
+    {
+        if($order->seller_id == 0){
+            //dd($order->orderDetails[0]->seller_id);
+            $order->seller_id = $order->orderDetails[0]->seller_id;
+            $order->save();
+        }
     }
 }

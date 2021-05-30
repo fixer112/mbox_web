@@ -91,7 +91,7 @@ class ConversationController extends Controller
     {
         $array['view'] = 'emails.conversation';
         $array['subject'] = 'Sender:- '.Auth::user()->name;
-        $array['from'] = env('MAIL_USERNAME');
+        $array['from'] = env('MAIL_FROM_ADDRESS');
         $array['content'] = 'Hi! You recieved a message from '.Auth::user()->name.'.';
         $array['sender'] = Auth::user()->name;
 

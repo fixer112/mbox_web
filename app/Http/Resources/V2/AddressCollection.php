@@ -11,14 +11,14 @@ class AddressCollection extends ResourceCollection
         return [
             'data' => $this->collection->map(function($data) {
                 return [
-                    'id'      => $data->id,
-                    'user_id' => $data->user_id,
+                    'id'      =>(int) $data->id,
+                    'user_id' =>(int) $data->user_id,
                     'address' => $data->address,
                     'country' => $data->country,
                     'city' => $data->city,
                     'postal_code' => $data->postal_code,
                     'phone' => $data->phone,
-                    'set_default' => $data->set_default
+                    'set_default' =>(int) $data->set_default
                 ];
             })
         ];

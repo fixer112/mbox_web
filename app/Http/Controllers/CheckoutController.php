@@ -6,6 +6,7 @@ use App\Utility\PayfastUtility;
 use Illuminate\Http\Request;
 use Auth;
 use App\Category;
+use App\Cart;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\InstamojoController;
 use App\Http\Controllers\ClubPointController;
@@ -23,7 +24,6 @@ use App\User;
 use App\Address;
 use Session;
 use App\Utility\PayhereUtility;
-use App\Models\Cart;
 
 class CheckoutController extends Controller
 {
@@ -108,11 +108,7 @@ class CheckoutController extends Controller
                     $paytm = new PaytmController;
                     return $paytm->index();
                 } elseif ($request->payment_option == 'cash_on_delivery') {
-                    $request->session()->put('cart', Session::get('cart')->where('owner_id', '!=', Session::get('owner_id')));
-                    $request->session()->forget('owner_id');
-                    $request->session()->forget('delivery_info');
-                    $request->session()->forget('coupon_id');
-                    $request->session()->forget('coupon_discount');
+                    
                     $request->session()->forget('club_point');
 
                     flash(translate("Your order has been placed successfully"))->success();
@@ -130,11 +126,6 @@ class CheckoutController extends Controller
                     $order->manual_payment = 1;
                     $order->save();
 
-                    $request->session()->put('cart', Session::get('cart')->where('owner_id', '!=', Session::get('owner_id')));
-                    $request->session()->forget('owner_id');
-                    $request->session()->forget('delivery_info');
-                    $request->session()->forget('coupon_id');
-                    $request->session()->forget('coupon_discount');
                     $request->session()->forget('club_point');
 
                     flash(translate('Your order has been placed successfully. Please submit payment information from purchase history'))->success();
@@ -206,28 +197,6 @@ class CheckoutController extends Controller
                 
             }
             
-//            if (BusinessSetting::where('type', 'category_wise_commission')->first()->value != 1) {
-//                $commission_percentage = BusinessSetting::where('type', 'vendor_commission')->first()->value;
-//                foreach ($order->orderDetails as $key => $orderDetail) {
-//                    
-//                    if ($orderDetail->product->user->user_type == 'seller') {
-//                        $seller = $orderDetail->product->user->seller;
-//                        $seller->admin_to_pay = $seller->admin_to_pay + ($orderDetail->price * (100 - $commission_percentage)) / 100 + $orderDetail->tax + $orderDetail->shipping_cost;
-//                        $seller->save();
-//                    }
-//                }
-//            } else {
-//                foreach ($order->orderDetails as $key => $orderDetail) {
-//                    $orderDetail->payment_status = 'paid';
-//                    $orderDetail->save();
-//                    if ($orderDetail->product->user->user_type == 'seller') {
-//                        $commission_percentage = $orderDetail->product->category->commision_rate;
-//                        $seller = $orderDetail->product->user->seller;
-//                        $seller->admin_to_pay = $seller->admin_to_pay + ($orderDetail->price * (100 - $commission_percentage)) / 100 + $orderDetail->tax + $orderDetail->shipping_cost;
-//                        $seller->save();
-//                    }
-//                }
-//            }
         } else {
             foreach ($order->orderDetails as $key => $orderDetail) {
                 $orderDetail->payment_status = 'paid';
@@ -242,15 +211,11 @@ class CheckoutController extends Controller
 
         $order->commission_calculated = 1;
         $order->save();
-
-        if (Session::has('cart')) {
-            Session::put('cart', Session::get('cart')->where('owner_id', '!=', Session::get('owner_id')));
-        }
-        Session::forget('owner_id');
-        Session::forget('payment_type');
-        Session::forget('delivery_info');
-        Session::forget('coupon_id');
-        Session::forget('coupon_discount');
+        
+        Cart::where('owner_id', $order->seller_id)
+                ->where('user_id', $order->user_id)
+                ->delete();
+        
         Session::forget('club_point');
 
 
@@ -260,10 +225,11 @@ class CheckoutController extends Controller
 
     public function get_shipping_info(Request $request)
     {
-         $cart = Cart::where('user_id',  Auth::id())->orderBy('created_at', 'desc')->get();
-        if ($cart && count($cart) > 0) {
+        $carts = Cart::where('user_id', Auth::user()->id)->get();
+//        if (Session::has('cart') && count(Session::get('cart')) > 0) {
+        if ($carts && count($carts) > 0) {
             $categories = Category::all();
-            return view('frontend.shipping_info', compact('categories'));
+            return view('frontend.shipping_info', compact('categories', 'carts'));
         }
         flash(translate('Your cart is empty'))->success();
         return back();
@@ -271,172 +237,144 @@ class CheckoutController extends Controller
 
     public function store_shipping_info(Request $request)
     {
-        if (Auth::check()) {
-            if ($request->address_id == null) {
-                flash(translate("Please add shipping address"))->warning();
-                return back();
-            }
-            $address = Address::findOrFail($request->address_id);
-            $data['name'] = Auth::user()->name;
-            $data['email'] = Auth::user()->email;
-            $data['address'] = $address->address;
-            $data['country'] = $address->country;
-            $data['city'] = $address->city;
-            $data['postal_code'] = $address->postal_code;
-            $data['phone'] = $address->phone;
-            $data['checkout_type'] = $request->checkout_type;
-        } else {
-            $data['name'] = $request->name;
-            $data['email'] = $request->email;
-            $data['address'] = $request->address;
-            $data['country'] = $request->country;
-            $data['city'] = $request->city;
-            $data['postal_code'] = $request->postal_code;
-            $data['phone'] = $request->phone;
-            $data['checkout_type'] = $request->checkout_type;
+        if ($request->address_id == null) {
+            flash(translate("Please add shipping address"))->warning();
+            return back();
+        }
+        
+        $carts = Cart::where('user_id', Auth::user()->id)->get();
+        
+        foreach ($carts as $key => $cartItem) {
+            $cartItem->address_id = $request->address_id;
+            $cartItem->save();
         }
 
-        $shipping_info = $data;
-        $request->session()->put('shipping_info', $shipping_info);
-
-        $subtotal = 0;
-        $tax = 0;
-        $shipping = 0;
-        foreach (Session::get('cart') as $key => $cartItem) {
-            $subtotal += $cartItem['price'] * $cartItem['quantity'];
-            $tax += $cartItem['tax'] * $cartItem['quantity'];
-            
-            if(isset($cartItem['shipping']) && is_array(json_decode($cartItem['shipping'], true))) {
-                foreach(json_decode($cartItem['shipping'], true) as $shipping_region => $val) {
-                    if($shipping_info['city'] == $shipping_region) {
-                        $shipping += (double)($val) * $cartItem['quantity'];
-                    }
-                }
-            } else {
-                if (!$cartItem['shipping']) {
-                    $shipping += 0;
-                }
-//                $shipping += $cartItem['shipping'] * $cartItem['quantity'];
-
-            }
-        }
-
-        $total = $subtotal + $tax + $shipping;
-
-        if (Session::has('coupon_discount')) {
-            $total -= Session::get('coupon_discount');
-        }
-
-        return view('frontend.delivery_info');
+        return view('frontend.delivery_info', compact('carts'));
         // return view('frontend.payment_select', compact('total'));
     }
 
     public function store_delivery_info(Request $request)
     {
-        $request->session()->put('owner_id', $request->owner_id);
-
-        if (Session::has('cart') && count(Session::get('cart')) > 0) {
-            $cart = $request->session()->get('cart', collect([]));
-            $cart = $cart->map(function ($object, $key) use ($request) {
-                if (\App\Product::find($object['id'])->user_id == $request->owner_id) {
-                    if ($request['shipping_type_' . $request->owner_id] == 'pickup_point') {
-                        $object['shipping_type'] = 'pickup_point';
-                        $object['pickup_point'] = $request['pickup_point_id_' . $request->owner_id];
-                    } else {
-                        $object['shipping_type'] = 'home_delivery';
-                    }
-                }
-                return $object;
-            });
-
-            $request->session()->put('cart', $cart);
-
-            $cart = $cart->map(function ($object, $key) use ($request) {
-                if (\App\Product::find($object['id'])->user_id == $request->owner_id) {
-                    if ($object['shipping_type'] == 'home_delivery') {
-                        $object['shipping'] = getShippingCost($key);
-                    }
-                    else {
-                        $object['shipping'] = 0;
-                    }
-                } else {
-                    $object['shipping'] = 0;
-                }
-                return $object;
-            });
-
-            $request->session()->put('cart', $cart);
-            $shipping_info = $request->session()->get('shipping_info');
-            $subtotal = 0;
-            $tax = 0;
-            $shipping = 0;
-            
-            foreach (Session::get('cart') as $key => $cartItem) {
-                $subtotal += $cartItem['price'] * $cartItem['quantity'];
+        $carts = Cart::where('user_id', Auth::user()->id)
+                ->where('owner_id', $request->owner_id)
+                ->get();
+        $shipping_info = Address::where('id', $carts[0]['address_id'])->first();
+        $total = 0;
+        $tax = 0;
+        $shipping = 0;
+        $subtotal = 0;
+        
+        if ($carts && count($carts) > 0) {
+            foreach ($carts as $key => $cartItem) {
+                $product = \App\Product::find($cartItem['product_id']);
                 $tax += $cartItem['tax'] * $cartItem['quantity'];
-                if(isset($cartItem['shipping']) && is_array(json_decode($cartItem['shipping'], true))) {
-                    foreach(json_decode($cartItem['shipping'], true) as $shipping_region => $val) {
+                $subtotal += $cartItem['price'] * $cartItem['quantity'];
+                
+                if ($request['shipping_type_' . $request->owner_id] == 'pickup_point') {
+                    $cartItem['shipping_type'] = 'pickup_point';
+                    $cartItem['pickup_point'] = $request['pickup_point_id_' . $request->owner_id];
+                } else {
+                    $cartItem['shipping_type'] = 'home_delivery';
+                }
+                $cartItem['shipping_cost'] = 0;
+                if ($cartItem['shipping_type'] == 'home_delivery') {
+                    $cartItem['shipping_cost'] = getShippingCost($carts, $key);
+                }
+                
+                if(isset($cartItem['shipping_cost']) && is_array(json_decode($cartItem['shipping_cost'], true))) {
+                    
+                    foreach(json_decode($cartItem['shipping_cost'], true) as $shipping_region => $val) {
                         if($shipping_info['city'] == $shipping_region) {
-                            $shipping += (double)($val) * $cartItem['quantity'];
+                            $cartItem['shipping_cost'] = (double)($val);
+                            break;
+                        } else {
+                            $cartItem['shipping_cost'] = 0;
                         }
                     }
                 } else {
-                    if (!$cartItem['shipping']) {
-                        $shipping += 0;
+                    if (!$cartItem['shipping_cost'] || 
+                            $cartItem['shipping_cost'] == null || 
+                            $cartItem['shipping_cost'] == 'null') {
+
+                        $cartItem['shipping_cost'] = 0;
                     }
                 }
                 
+                if($product->is_quantity_multiplied == 1 && get_setting('shipping_type') == 'product_wise_shipping') {
+                    $cartItem['shipping_cost'] =  $cartItem['shipping_cost'] * $cartItem['quantity'];
+                }
+                
+                $shipping += $cartItem['shipping_cost'];
+                $cartItem->save();
+                
             }
-
             $total = $subtotal + $tax + $shipping;
-
-            if (Session::has('coupon_discount')) {
-                $total -= Session::get('coupon_discount');
-            }
-
-            return view('frontend.payment_select', compact('total', 'shipping_info'));
+            return view('frontend.payment_select', compact('carts', 'shipping_info', 'total'));
+            
         } else {
             flash(translate('Your Cart was empty'))->warning();
             return redirect()->route('home');
         }
     }
 
-    public function get_payment_info(Request $request)
-    {
-        $subtotal = 0;
-        $tax = 0;
-        $shipping = 0;
-        $shipping_info = $request->session()->get('shipping_info');
-        foreach (Session::get('cart') as $key => $cartItem) {
-            $subtotal += $cartItem['price'] * $cartItem['quantity'];
-            $tax += $cartItem['tax'] * $cartItem['quantity'];
-            if(isset($cartItem['shipping']) && is_array(json_decode($cartItem['shipping'], true))) {
-                foreach(json_decode($cartItem['shipping'], true) as $shipping_region => $val) {
-                    if($shipping_info['city'] == $shipping_region) {
-                        $shipping += (double)($val) * $cartItem['quantity'];
-                    }
-                }
-            } else {
-                if (!$cartItem['shipping']) {
-                    $shipping += 0;
-                }
-            }
-        }
-
-        $total = $subtotal + $tax + $shipping;
-
-        if (Session::has('coupon_discount')) {
-            $total -= Session::get('coupon_discount');
-        }
-
-        return view('frontend.payment_select', compact('total', 'shipping_info'));
-    }
+//    public function get_payment_info(Request $request)
+//    {
+//        $carts = Cart::where('user_id', Auth::user()->id)
+//                ->where('owner_id', $request->owner_id)
+//                ->get();
+//        $shipping_info = Address::where('id', $carts[0]['address_id'])->first();
+//        $total = 0;
+//        $tax = 0;
+//        $shipping = 0;
+//        $subtotal = 0;
+//
+//        if ($carts && count($carts) > 0) {
+//            foreach ($carts as $key => $cartItem) {
+//                $tax += $cartItem['tax'] * $cartItem['quantity'];
+//                $subtotal += $cartItem['price'] * $cartItem['quantity'];
+//
+//                if ($request['shipping_type_' . $request->owner_id] == 'pickup_point') {
+//                    $cartItem['shipping_type'] = 'pickup_point';
+//                    $cartItem['pickup_point'] = $request['pickup_point_id_' . $request->owner_id];
+//                } else {
+//                    $cartItem['shipping_type'] = 'home_delivery';
+//                }
+//                $cartItem['shipping_cost'] = 0;
+//                if ($cartItem['shipping_type'] == 'home_delivery') {
+//                    $cartItem['shipping_cost'] = getShippingCost($carts, $key);
+//                }
+//
+//                if (isset($cartItem['shipping_cost']) && is_array(json_decode($cartItem['shipping_cost'], true))) {
+//                    foreach (json_decode($cartItem['shipping_cost'], true) as $shipping_region => $val) {
+//                        if ($shipping_info['city'] == $shipping_region) {
+//                            $cartItem['shipping_cost'] = (double) ($val);
+//                            break;
+//                        }
+//                    }
+//                } else {
+//                    if (!$cartItem['shipping_cost'] ||
+//                            $cartItem['shipping_cost'] == null ||
+//                            $cartItem['shipping_cost'] == 'null') {
+//
+//                        $cartItem['shipping_cost'] = 0;
+//                    }
+//                }
+//                $shipping += $cartItem['shipping_cost'];
+//                $cartItem->save();
+//            }
+//            $total = $subtotal + $tax + $shipping;
+//            return view('frontend.payment_select', compact('carts', 'shipping_info', 'total'));
+//        }
+//    }
 
     public function apply_coupon_code(Request $request)
     {
-        //dd($request->all());
         $coupon = Coupon::where('code', $request->code)->first();
-
+        $carts = Cart::where('user_id', Auth::user()->id)
+                ->where('owner_id', $request->owner_id)
+                ->get();
+        $response_message = array();
+        
         if ($coupon != null) {
             if (strtotime(date('d-m-Y')) >= $coupon->start_date && strtotime(date('d-m-Y')) <= $coupon->end_date) {
                 if (CouponUsage::where('user_id', Auth::user()->id)->where('coupon_id', $coupon->id)->first() == null) {
@@ -446,10 +384,10 @@ class CheckoutController extends Controller
                         $subtotal = 0;
                         $tax = 0;
                         $shipping = 0;
-                        foreach (Session::get('cart') as $key => $cartItem) {
+                        foreach ($carts as $key => $cartItem) {
                             $subtotal += $cartItem['price'] * $cartItem['quantity'];
                             $tax += $cartItem['tax'] * $cartItem['quantity'];
-                            $shipping += $cartItem['shipping'] * $cartItem['quantity'];
+                            $shipping += $cartItem['shipping_cost'];
                         }
                         $sum = $subtotal + $tax + $shipping;
 
@@ -462,15 +400,13 @@ class CheckoutController extends Controller
                             } elseif ($coupon->discount_type == 'amount') {
                                 $coupon_discount = $coupon->discount;
                             }
-                            $request->session()->put('coupon_id', $coupon->id);
-                            $request->session()->put('coupon_discount', $coupon_discount);
-                            flash(translate('Coupon has been applied'))->success();
+                            
                         }
                     } elseif ($coupon->type == 'product_base') {
                         $coupon_discount = 0;
-                        foreach (Session::get('cart') as $key => $cartItem) {
+                        foreach ($carts as $key => $cartItem) {
                             foreach ($coupon_details as $key => $coupon_detail) {
-                                if ($coupon_detail->product_id == $cartItem['id']) {
+                                if ($coupon_detail->product_id == $cartItem['product_id']) {
                                     if ($coupon->discount_type == 'percent') {
                                         $coupon_discount += $cartItem['price'] * $coupon->discount / 100;
                                     } elseif ($coupon->discount_type == 'amount') {
@@ -479,27 +415,68 @@ class CheckoutController extends Controller
                                 }
                             }
                         }
-                        $request->session()->put('coupon_id', $coupon->id);
-                        $request->session()->put('coupon_discount', $coupon_discount);
-                        flash(translate('Coupon has been applied'))->success();
                     }
+                    
+                    Cart::where('user_id', Auth::user()->id)
+                            ->where('owner_id', $request->owner_id)
+                            ->update(
+                                    [
+                                        'discount' => $coupon_discount / count($carts),
+                                        'coupon_code' => $request->code,
+                                        'coupon_applied' => 1
+                                    ]
+                    );
+
+                    $response_message['response'] = 'success';
+                    $response_message['message'] = translate('Coupon has been applied');
+//                    flash(translate('Coupon has been applied'))->success();
                 } else {
-                    flash(translate('You already used this coupon!'))->warning();
+                    $response_message['response'] = 'warning';
+                    $response_message['message'] = translate('You already used this coupon!');
+//                    flash(translate('You already used this coupon!'))->warning();
                 }
             } else {
-                flash(translate('Coupon expired!'))->warning();
+                $response_message['response'] = 'warning';
+                $response_message['message'] = translate('Coupon expired!');
+//                flash(translate('Coupon expired!'))->warning();
             }
         } else {
-            flash(translate('Invalid coupon!'))->warning();
+            $response_message['response'] = 'danger';
+            $response_message['message'] = translate('Invalid coupon!');
+//            flash(translate('Invalid coupon!'))->warning();
         }
-        return back();
+        
+        $carts = Cart::where('user_id', Auth::user()->id)
+                ->where('owner_id', $request->owner_id)
+                ->get();
+        $shipping_info = Address::where('id', $carts[0]['address_id'])->first();
+        
+        $returnHTML = view('frontend.partials.cart_summary', compact('coupon', 'carts', 'shipping_info'))->render();
+        return response()->json(array('response_message' => $response_message, 'html'=>$returnHTML));
+//        return view('frontend.partials.cart_summary', compact('coupon', 'carts', 'shipping_info', 'response_message'));
     }
 
     public function remove_coupon_code(Request $request)
     {
-        $request->session()->forget('coupon_id');
-        $request->session()->forget('coupon_discount');
-        return back();
+        Cart::where('user_id', Auth::user()->id)
+                ->where('owner_id', $request->owner_id)
+                ->update(
+                        [
+                            'discount' => 0.00,
+                            'coupon_code' => '',
+                            'coupon_applied' => 0
+                        ]
+        );
+        
+        $coupon = Coupon::where('code', $request->code)->first();
+        $carts = Cart::where('user_id', Auth::user()->id)
+                ->where('owner_id', $request->owner_id)
+                ->get();
+//        dd($carts);
+        $shipping_info = Address::where('id', $carts[0]['address_id'])->first();
+        
+        return view('frontend.partials.cart_summary', compact('coupon', 'carts', 'shipping_info'));
+//        return back();
     }
     
     public function apply_club_point(Request $request) {
@@ -528,6 +505,11 @@ class CheckoutController extends Controller
     public function order_confirmed()
     {
         $order = Order::findOrFail(Session::get('order_id'));
+        
+        Cart::where('owner_id', $order->seller_id)
+                ->where('user_id', $order->user_id)
+                ->delete();
+        
         return view('frontend.order_confirmed', compact('order'));
     }
 }

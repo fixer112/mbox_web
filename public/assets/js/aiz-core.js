@@ -35,7 +35,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     .find(".file-amount")
                     .html(AIZ.uploader.updateFileHtml(selected));
             } else {
-                elem.find(".file-amount").html("Choose File");
+                elem.find(".file-amount").html(AIZ.local.choose_file);
             }
             $(elem).find(".selected-files").val(selected);
         },
@@ -176,11 +176,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
         updateFileHtml: function (array) {
             var fileText = "";
             if (array.length > 1) {
-                var fileText = "Files";
+                var fileText = AIZ.local.files_selected;
             } else {
-                var fileText = "File";
+                var fileText = AIZ.local.file_selected;
             }
-            return array.length + " " + fileText + " " + "selected";
+            return array.length + " " + fileText;
         },
         updateUploaderSelected: function () {
             $(".aiz-uploader-selected").html(
@@ -446,7 +446,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             '<span class="text-truncate title">' +
                             data[i].file_original_name +
                             "</span>" +
-                            '<span class="ext">.' +
+                            '<span class="ext flex-shrink-0">.' +
                             data[i].extension +
                             "</span>" +
                             "</h6>" +
@@ -517,7 +517,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                     '<span class="text-truncate title">' +
                                     data[i].file_original_name +
                                     "</span>" +
-                                    '<span class="ext">.' +
+                                    '<span class="flex-shrink-0 ext">.' +
                                     data[i].extension +
                                     "</span>" +
                                     "</h6>" +
@@ -537,11 +537,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                 elem.next(".file-preview").append(html);
                             }
                         } else {
-                            elem.find(".file-amount").html("Choose File");
+                            elem.find(".file-amount").html(AIZ.local.choose_file);
                         }
                 });
             } else {
-                elem.find(".file-amount").html("Choose File");
+                elem.find(".file-amount").html(AIZ.local.choose_file);
             }
 
             // if (AIZ.uploader.data.selectedFiles.length > 0) {
@@ -798,7 +798,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                     '<span class="text-truncate title">' +
                                     data[i].file_original_name +
                                     "</span>" +
-                                    '<span class="ext">.' +
+                                    '<span class="ext flex-shrink-0">.' +
                                     data[i].extension +
                                     "</span>" +
                                     "</h6>" +
@@ -818,7 +818,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                 $this.next(".file-preview").append(html);
                             }
                         } else {
-                            $this.find(".file-amount").html("Choose File");
+                            $this.find(".file-amount").html(AIZ.local.choose_file);
                         }
                 });
             });
@@ -837,7 +837,8 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         $this.val(selected);
                     }
                     $this.selectpicker({
-                        size: 5,                    
+                        size: 5,
+                        noneSelectedText: AIZ.local.nothing_selected,                     
                         virtualScroll: false
                     });
                 }
@@ -1098,6 +1099,34 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     hidePauseResumeButton: true,
                     hideUploadButton: true,
                     proudlyDisplayPoweredByUppy: false,
+                    locale: {
+                        strings: {
+                            addMoreFiles: AIZ.local.add_more_files,
+                            addingMoreFiles: AIZ.local.adding_more_files,
+                            dropPaste: AIZ.local.drop_files_here_paste_or+' %{browse}',
+                            browse: AIZ.local.browse,
+                            uploadComplete: AIZ.local.upload_complete,
+                            uploadPaused: AIZ.local.upload_paused,
+                            resumeUpload: AIZ.local.resume_upload,
+                            pauseUpload: AIZ.local.pause_upload,
+                            retryUpload: AIZ.local.retry_upload,
+                            cancelUpload: AIZ.local.cancel_upload,
+                            xFilesSelected: {
+                                0: '%{smart_count} '+AIZ.local.file_selected,
+                                1: '%{smart_count} '+AIZ.local.files_selected
+                            },
+                            uploadingXFiles: {
+                                0: AIZ.local.uploading+' %{smart_count} '+AIZ.local.file,
+                                1: AIZ.local.uploading+' %{smart_count} '+AIZ.local.files
+                            },
+                            processingXFiles: {
+                                0: AIZ.local.processing+' %{smart_count} '+AIZ.local.file,
+                                1: AIZ.local.processing+' %{smart_count} '+AIZ.local.files
+                            },
+                            uploading: AIZ.local.uploading,
+                            complete: AIZ.local.complete,
+                        }
+                    }
                 });
                 uppy.use(Uppy.XHRUpload, {
                     endpoint: AIZ.data.appUrl + "/aiz-uploader/upload",
@@ -1308,6 +1337,9 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 $('.img-zoom').zoom({
                     magnify:1.5
                 });
+                if((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))){
+                    $('.img-zoom').trigger('zoom.destroy');
+                }
             }
         },
         jsSocials: function(){
@@ -1440,9 +1472,9 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 } else if (files.length > 1) {
                     $(this)
                         .next(".custom-file-name")
-                        .html(files.length + " Files Selected");
+                        .html(files.length + " " + AIZ.local.files_selected);
                 } else {
-                    $(this).next(".custom-file-name").html("Choose file");
+                    $(this).next(".custom-file-name").html(AIZ.local.choose_file);
                 }
             });
         },

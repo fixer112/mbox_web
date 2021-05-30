@@ -17,6 +17,9 @@ Route::get('/demo/cron_2', 'DemoController@cron_2');
 Route::get('/convert_assets', 'DemoController@convert_assets');
 Route::get('/convert_category', 'DemoController@convert_category');
 Route::get('/convert_tax', 'DemoController@convertTaxes');
+Route::get('/insert_product_variant_forcefully/{id_min}/{id_max}', 'DemoController@insert_product_variant_forcefully');
+Route::get('/update_seller_id_in_orders/{id_min}/{id_max}', 'DemoController@update_seller_id_in_orders');
+
 
 
 Route::get('/refresh-csrf', function() {
@@ -102,7 +105,7 @@ Route::group(['middleware' => ['checkout']], function() {
 Route::get('/checkout/order-confirmed', 'CheckoutController@order_confirmed')->name('order_confirmed');
 Route::post('/checkout/payment', 'CheckoutController@checkout')->name('payment.checkout');
 Route::post('/get_pick_ip_points', 'HomeController@get_pick_ip_points')->name('shipping_info.get_pick_ip_points');
-Route::get('/checkout/payment_select', 'CheckoutController@get_payment_info')->name('checkout.payment_info');
+Route::get('/checkout/payment-select', 'CheckoutController@get_payment_info')->name('checkout.payment_info');
 Route::post('/checkout/apply_coupon_code', 'CheckoutController@apply_coupon_code')->name('checkout.apply_coupon_code');
 Route::post('/checkout/remove_coupon_code', 'CheckoutController@remove_coupon_code')->name('checkout.remove_coupon_code');
 //Club point
@@ -137,14 +140,6 @@ Route::resource('subscribers', 'SubscriberController');
 Route::get('/brands', 'HomeController@all_brands')->name('brands.all');
 Route::get('/categories', 'HomeController@all_categories')->name('categories.all');
 Route::get('/sellers', 'HomeController@all_seller')->name('sellers');
-
-Route::get('/sellerscustom', 'HomeController@sellercustom');
-Route::post('approve-custom-order', 'HomeController@approveCustomOrder')->name('approve-custom-order');
-Route::post('reject-custom-order', 'HomeController@rejectCustomOrder')->name('reject-custom-order');
-
-
-
-
 
 Route::get('/sellerpolicy', 'HomeController@sellerpolicy')->name('sellerpolicy');
 Route::get('/returnpolicy', 'HomeController@returnpolicy')->name('returnpolicy');
@@ -218,6 +213,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/orders/details', 'OrderController@order_details')->name('orders.details');
     Route::post('/orders/update_delivery_status', 'OrderController@update_delivery_status')->name('orders.update_delivery_status');
     Route::post('/orders/update_payment_status', 'OrderController@update_payment_status')->name('orders.update_payment_status');
+    Route::post('/orders/delivery-boy-assign', 'OrderController@assign_delivery_boy')->name('orders.delivery-boy-assign');
     
     Route::resource('/reviews', 'ReviewController');
 
@@ -230,7 +226,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/conversations/destroy/{id}', 'ConversationController@destroy')->name('conversations.destroy');
     Route::post('conversations/refresh', 'ConversationController@refresh')->name('conversations.refresh');
     Route::resource('messages', 'MessageController');
-    Route::post('/customordermsg', 'HomeController@storecustomorder');
 
     //Product Bulk Upload
     Route::get('/product-bulk-upload/index', 'ProductBulkUploadController@index')->name('product_bulk_upload.index');
@@ -256,7 +251,7 @@ Route::group(['middleware' => ['auth']], function() {
 });
 
 Route::resource('shops', 'ShopController');
-Route::get('/track_your_order', 'HomeController@trackOrder')->name('orders.track');
+Route::get('/track-your-order', 'HomeController@trackOrder')->name('orders.track');
 
 Route::get('/instamojo/payment/pay-success', 'InstamojoController@success')->name('instamojo.success');
 
@@ -320,6 +315,9 @@ Route::get('/nagad/callback', 'NagadController@verify')->name('nagad.callback');
 Route::get('/blog', 'BlogController@all_blog')->name('blog');
 Route::get('/blog/{slug}', 'BlogController@blog_details')->name('blog.details');
 
+
+//mobile app balnk page for webview
+Route::get('/mobile-page/{slug}', 'PageController@mobile_custom_page')->name('mobile.custom-pages');
 
 //Custom page
 Route::get('/{slug}', 'PageController@show_custom_page')->name('custom-pages.show_custom_page');

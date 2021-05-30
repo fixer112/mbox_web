@@ -142,7 +142,7 @@
                                     <td>{{ single_price($orderDetail->price) }}</td>
                                     @if ($refund_request_addon != null && $refund_request_addon->activated == 1)
                                         @php
-                                            $no_of_max_day = \App\BusinessSetting::where('type', 'refund_request_time')->first()->value;
+                                            $no_of_max_day = get_setting('refund_request_time');
                                             $last_refund_date = $orderDetail->created_at->addDays($no_of_max_day);
                                             $today_date = Carbon\Carbon::now();
                                         @endphp

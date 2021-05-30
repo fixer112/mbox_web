@@ -68,20 +68,20 @@ class CartController extends Controller
                 if (!empty($shop_items_raw_data)) {
                     foreach ($shop_items_raw_data as $shop_items_raw_data_item) {
                         $product = Product::where('id', $shop_items_raw_data_item["product_id"])->first();
-                        $shop_items_data_item["id"] = $shop_items_raw_data_item["id"];
-                        $shop_items_data_item["owner_id"] = $shop_items_raw_data_item["owner_id"];
-                        $shop_items_data_item["user_id"] = $shop_items_raw_data_item["user_id"];
-                        $shop_items_data_item["product_id"] = $shop_items_raw_data_item["product_id"];
+                        $shop_items_data_item["id"] = (int) $shop_items_raw_data_item["id"];
+                        $shop_items_data_item["owner_id"] =(int) $shop_items_raw_data_item["owner_id"];
+                        $shop_items_data_item["user_id"] =(int) $shop_items_raw_data_item["user_id"];
+                        $shop_items_data_item["product_id"] =(int) $shop_items_raw_data_item["product_id"];
                         $shop_items_data_item["product_name"] = $product->name;
                         $shop_items_data_item["product_thumbnail_image"] = api_asset($product->thumbnail_img);
                         $shop_items_data_item["variation"] = $shop_items_raw_data_item["variation"];
-                        $shop_items_data_item["price"] = $shop_items_raw_data_item["price"];
+                        $shop_items_data_item["price"] =(double) $shop_items_raw_data_item["price"];
                         $shop_items_data_item["currency_symbol"] = $currency_symbol;
-                        $shop_items_data_item["tax"] = $shop_items_raw_data_item["tax"];
-                        $shop_items_data_item["shipping_cost"] = $shop_items_raw_data_item["shipping_cost"];
-                        $shop_items_data_item["quantity"] = $shop_items_raw_data_item["quantity"];
-                        $shop_items_data_item["lower_limit"] = $product->min_qty;
-                        $shop_items_data_item["upper_limit"] = $product->stocks->where('variant', $shop_items_raw_data_item['variation'])->first()->qty;
+                        $shop_items_data_item["tax"] =(double) $shop_items_raw_data_item["tax"];
+                        $shop_items_data_item["shipping_cost"] =(double) $shop_items_raw_data_item["shipping_cost"];
+                        $shop_items_data_item["quantity"] =(int) $shop_items_raw_data_item["quantity"];
+                        $shop_items_data_item["lower_limit"] =(int) $product->min_qty;
+                        $shop_items_data_item["upper_limit"] =(int) $product->stocks->where('variant', $shop_items_raw_data_item['variation'])->first()->qty;
 
                         $shop_items_data[] = $shop_items_data_item;
 
@@ -92,11 +92,11 @@ class CartController extends Controller
                 $shop_data = Shop::where('user_id', $owner_id)->first();
                 if ($shop_data) {
                     $shop['name'] = $shop_data->name;
-                    $shop['owner_id'] = $owner_id;
+                    $shop['owner_id'] =(int) $owner_id;
                     $shop['cart_items'] = $shop_items_data;
                 } else {
                     $shop['name'] = "Inhouse";
-                    $shop['owner_id'] = $owner_id;
+                    $shop['owner_id'] =(int) $owner_id;
                     $shop['cart_items'] = $shop_items_data;
                 }
                 $shops[] = $shop;

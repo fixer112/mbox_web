@@ -74,7 +74,7 @@
                                 <div class="col mb-2">
                                     <a href="{{ route('product', $product->slug) }}" class="d-block p-2 text-reset bg-white h-100 rounded">
                                         <div class="row gutters-5 align-items-center">
-                                            <div class="col-lg">
+                                            <div class="col-xxl">
                                                 <div class="img">
                                                     <img
                                                         class="lazyload img-fit h-140px h-lg-80px"
@@ -85,7 +85,7 @@
                                                     >
                                                 </div>
                                             </div>
-                                            <div class="col-lg">
+                                            <div class="col-xxl">
                                                 <div class="fs-16">
                                                     <span class="d-block text-primary fw-600">{{ home_discounted_base_price($product->id) }}</span>
                                                     @if(home_base_price($product->id) != home_discounted_base_price($product->id))
@@ -245,7 +245,7 @@
     </div>
 
     {{-- Classified Product --}}
-    @if(\App\BusinessSetting::where('type', 'classified_product')->first()->value == 1)
+    @if(get_setting('classified_product') == 1)
         @php
             $classified_products = \App\CustomerProduct::where('status', '1')->where('published', '1')->take(10)->get();
         @endphp
@@ -320,13 +320,14 @@
     @endif
 
     {{-- Best Seller --}}
-    @if (\App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+    @if (get_setting('vendor_system_activation') == 1)
     <div id="section_best_sellers">
 
     </div>
     @endif
 
     {{-- Top 10 categories and Brands --}}
+    @if (get_setting('top10_categories') != null && get_setting('top10_brands') != null)
     <section class="mb-4">
         <div class="container">
             <div class="row gutters-10">
@@ -369,7 +370,7 @@
                         </div>
                     </div>
                 @endif
-                @if (get_setting('top10_categories') != null)
+                @if (get_setting('top10_brands') != null)
                     <div class="col-lg-6">
                         <div class="d-flex mb-3 align-items-baseline border-bottom">
                             <h3 class="h5 fw-700 mb-0">
@@ -411,6 +412,7 @@
             </div>
         </div>
     </section>
+    @endif
 
 @endsection
 
@@ -430,7 +432,7 @@
                 AIZ.plugins.slickCarousel();
             });
 
-            @if (\App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+            @if (get_setting('vendor_system_activation') == 1)
             $.post('{{ route('home.section.best_sellers') }}', {_token:'{{ csrf_token() }}'}, function(data){
                 $('#section_best_sellers').html(data);
                 AIZ.plugins.slickCarousel();

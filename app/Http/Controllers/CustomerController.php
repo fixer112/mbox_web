@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Customer;
 use App\User;
 use App\Order;
-use App\Customorder;
 
 class CustomerController extends Controller
 {
@@ -31,20 +30,6 @@ class CustomerController extends Controller
         $customers = $customers->paginate(15);
         return view('backend.customer.customers.index', compact('customers', 'sort_search'));
     }
-    
-    
-        public function customorder()
-    {
-         $sort_search = null;
-        $customers = Customorder::get();
-    
-           return view('backend.customorder.index', compact('customers'));
-
-   
-    }
-    
-    
-    
 
     /**
      * Show the form for creating a new resource.

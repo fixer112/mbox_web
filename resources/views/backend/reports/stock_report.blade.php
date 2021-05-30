@@ -9,7 +9,6 @@
 
 <div class="row">
     <div class="col-md-8 mx-auto">
-    <div class="col-md-8 mx-auto">
         <div class="card">
             <!--card body-->
             <div class="card-body">
@@ -39,13 +38,8 @@
                         @foreach ($products as $key => $product)
                             @php
                                 $qty = 0;
-                                if ($product->variant_product) {
-                                    foreach ($product->stocks as $key => $stock) {
-                                        $qty += $stock->qty;
-                                    }
-                                }
-                                else {
-                                    $qty = $product->current_stock;
+                                foreach ($product->stocks as $key => $stock) {
+                                    $qty += $stock->qty;
                                 }
                             @endphp
                             <tr>

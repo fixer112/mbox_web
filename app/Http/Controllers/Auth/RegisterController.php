@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Customer;
+use App\Cart;
 use App\BusinessSetting;
 use App\OtpConfiguration;
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Cookie;
+use Session;
 use Nexmo;
 use Twilio\Rest\Client;
 
@@ -98,6 +100,16 @@ class RegisterController extends Controller
                 $otpController = new OTPVerificationController;
                 $otpController->send_code($user);
             }
+        }
+        
+        if(session('temp_user_id') != null){
+            Cart::where('temp_user_id', session('temp_user_id'))
+                    ->update([
+                        'user_id' => $user->id,
+                        'temp_user_id' => null
+            ]);
+
+            Session::forget('temp_user_id');
         }
 
         if(Cookie::has('referral_code')){

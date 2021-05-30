@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Socialite;
-use App\User;
+use App\Cart;
 use App\Customer;
+use App\Http\Controllers\Controller;
+use App\User;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use CoreComponentRepository;
 use Illuminate\Support\Str;
+use Session;
+use Socialite;
 
 class LoginController extends Controller
 {
@@ -22,7 +23,7 @@ class LoginController extends Controller
     | redirecting them to your home screen. The controller uses a trait
     | to conveniently provide its functionality to your applications.
     |
-    */
+     */
 
     use AuthenticatesUsers;
 
@@ -33,12 +34,11 @@ class LoginController extends Controller
      */
     /*protected $redirectTo = '/';*/
 
-
     /**
-      * Redirect the user to the Google authentication page.
-      *
-      * @return \Illuminate\Http\Response
-      */
+     * Redirect the user to the Google authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function redirectToProvider($provider)
     {
         return Socialite::driver($provider)->redirect();
@@ -52,10 +52,9 @@ class LoginController extends Controller
     public function handleProviderCallback(Request $request, $provider)
     {
         try {
-            if($provider == 'twitter'){
+            if ($provider == 'twitter') {
                 $user = Socialite::driver('twitter')->user();
-            }
-            else{
+            } else {
                 $user = Socialite::driver($provider)->stateless()->user();
             }
         } catch (\Exception $e) {
@@ -66,16 +65,16 @@ class LoginController extends Controller
         // check if they're an existing user
         $existingUser = User::where('provider_id', $user->id)->orWhere('email', $user->email)->first();
 
-        if($existingUser){
+        if ($existingUser) {
             // log them in
             auth()->login($existingUser, true);
         } else {
             // create a new user
-            $newUser                  = new User;
-            $newUser->name            = $user->name;
-            $newUser->email           = $user->email;
+            $newUser = new User;
+            $newUser->name = $user->name;
+            $newUser->email = $user->email;
             $newUser->email_verified_at = date('Y-m-d H:m:s');
-            $newUser->provider_id     = $user->id;
+            $newUser->provider_id = $user->id;
             $newUser->save();
 
             $customer = new Customer;
@@ -84,27 +83,26 @@ class LoginController extends Controller
 
             auth()->login($newUser, true);
         }
-        if(session('link') != null){
+        if (session('link') != null) {
             return redirect(session('link'));
-        }
-        else{
+        } else {
             return redirect()->route('dashboard');
         }
     }
 
     /**
-        * Get the needed authorization credentials from the request.
-        *
-        * @param  \Illuminate\Http\Request  $request
-        * @return array
-        */
-       protected function credentials(Request $request)
-       {
-           if(filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)){
-               return $request->only($this->username(), 'password');
-           }
-           return ['phone'=>$request->get('email'),'password'=>$request->get('password')];
-       }
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function credentials(Request $request)
+    {
+        if (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
+            return $request->only($this->username(), 'password');
+        }
+        return ['phone' => $request->get('email'), 'password' => $request->get('password')];
+    }
 
     /**
      * Check user's role and redirect user based on their role
@@ -112,16 +110,26 @@ class LoginController extends Controller
      */
     public function authenticated()
     {
-        if(auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff')
-        {
-            CoreComponentRepository::instantiateShopRepository();
+        if (session('temp_user_id') != null) {
+            Cart::where('temp_user_id', session('temp_user_id'))
+                ->update(
+                    [
+                        'user_id' => auth()->user()->id,
+                        'temp_user_id' => null,
+                    ]
+                );
+
+            Session::forget('temp_user_id');
+        }
+
+        if (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff') {
+            //CoreComponentRepository::instantiateShopRepository();
             return redirect()->route('admin.dashboard');
         } else {
 
-            if(session('link') != null){
+            if (session('link') != null) {
                 return redirect(session('link'));
-            }
-            else{
+            } else {
                 return redirect()->route('dashboard');
             }
         }
@@ -149,11 +157,15 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        if(auth()->user() != null && (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff')){
+        if (auth()->user() != null && (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff')) {
             $redirect_route = 'login';
-        }
-        else{
+        } else {
             $redirect_route = 'home';
+        }
+
+        //User's Cart Delete
+        if (auth()->user()) {
+            Cart::where('user_id', auth()->user()->id)->delete();
         }
 
         $this->guard()->logout();

@@ -35,6 +35,7 @@
 	<script>
     	var AIZ = AIZ || {};
         AIZ.local = {
+            nothing_selected: '{{ translate('Nothing selected') }}',
             nothing_found: '{{ translate('Nothing found') }}',
             choose_file: '{{ translate('Choose file') }}',
             file_selected: '{{ translate('File selected') }}',
@@ -69,7 +70,7 @@
                     @yield('content')
 				</div>
 				<div class="bg-white text-center py-3 px-15px px-lg-25px mt-auto">
-					<p class="mb-0">&copy; {{ get_setting('site_name') }} </p>
+					<p class="mb-0">&copy; {{ get_setting('site_name') }} v{{ get_setting('current_version') }}</p>
 				</div>
 			</div><!-- .aiz-main-content -->
 		</div><!-- .aiz-content-wrapper -->

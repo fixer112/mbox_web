@@ -114,7 +114,7 @@ class CityController extends Controller
     }
     
     public function get_city(Request $request) {
-        $country_info = Country::where('name', $request->country_name)->first();
+        $country_info = Country::where('status',1)->where('name', $request->country_name)->first();
         
         $cities = City::where('country_id', $country_info->id)->get();
         $html = '';

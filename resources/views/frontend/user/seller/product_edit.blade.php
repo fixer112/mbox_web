@@ -59,7 +59,7 @@
                         <label class="col-lg-3 col-from-label">{{translate('Brand')}}</label>
                         <div class="col-lg-8">
                             <select class="form-control aiz-selectpicker" name="brand_id" id="brand_id">
-                                <option value="">{{ ('Select Brand') }}</option>
+                                <option value="">{{ translate('Select Brand') }}</option>
                                 @foreach (\App\Brand::all() as $brand)
                                 <option value="{{ $brand->id }}" @if($product->brand_id == $brand->id) selected
                                     @endif>{{ $brand->getTranslation('name') }}</option>
@@ -312,13 +312,13 @@
                         value="{{$product->unit_price}}" required>
                 </div>
             </div>
-            <div class="form-group row">
+<!--            <div class="form-group row">
                 <label class="col-lg-3 col-from-label">{{translate('Purchase price')}}</label>
                 <div class="col-lg-6">
                     <input type="number" lang="en" min="0" step="0.01" placeholder="{{translate('Purchase price')}}"
                         name="purchase_price" class="form-control" value="{{$product->purchase_price}}" required>
                 </div>
-            </div>
+            </div>-->
             <div class="form-group row">
                 <label class="col-lg-3 col-from-label">{{translate('Discount')}}</label>
                 <div class="col-lg-6">
@@ -334,11 +334,22 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group row" id="quantity">
-                <label class="col-lg-3 col-from-label">{{translate('Quantity')}}</label>
-                <div class="col-lg-6">
-                    <input type="number" lang="en" value="{{ $product->current_stock }}" step="1"
-                        placeholder="{{translate('Quantity')}}" name="current_stock" class="form-control" required>
+
+            <div id="show-hide-div">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-from-label">{{translate('Quantity')}}</label>
+                    <div class="col-lg-6">
+                        <input type="number" lang="en" value="{{ $product->stocks->first()->qty }}" step="1"
+                            placeholder="{{translate('Quantity')}}" name="current_stock" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-3 col-from-label">
+                        {{translate('SKU')}}
+                    </label>
+                    <div class="col-md-6">
+                        <input type="text" placeholder="{{ translate('SKU') }}" value="{{ $product->stocks->first()->sku }}" name="sku" class="form-control">
+                    </div>
                 </div>
             </div>
             <br>
@@ -437,7 +448,7 @@
                 </h5>
             </div>
             <div class="card-body collapse show" id="collapse_2">
-                @if (\App\BusinessSetting::where('type', 'shipping_type')->first()->value == 'product_wise_shipping')
+                @if (get_setting('shipping_type') == 'product_wise_shipping')
                 <div class="form-group row">
                     <label class="col-lg-6 col-from-label">{{translate('Free Shipping')}}</label>
                     <div class="col-lg-6">
@@ -739,10 +750,10 @@
                AIZ.uploader.previewGenerate();
                 AIZ.plugins.fooTable();
                if (data.length > 1) {
-                   $('#quantity').hide();
+                   $('#show-hide-div').hide();
                }
                else {
-                    $('#quantity').show();
+                    $('#show-hide-div').show();
                }
            }
        });

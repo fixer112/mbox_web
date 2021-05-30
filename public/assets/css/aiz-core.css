@@ -4736,6 +4736,11 @@ input[type="number"] {
         height: auto;
     }
 }
+.aiz-editor-data img{
+    max-width: 100% !important;
+    height: auto !important;
+}
+
 
 /*ecom pos ui*/
 .aiz-pos-product-list{

@@ -71,7 +71,7 @@ class ReportController extends Controller
         $date_range = null;
         
         if(Auth::user()->user_type == 'seller') {
-            $seller_id = $request->seller_id;
+            $seller_id = Auth::user()->id;
         } if($request->seller_id) {
             $seller_id = $request->seller_id;
         }

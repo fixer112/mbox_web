@@ -38,7 +38,7 @@
                                 $currency_code = Session::get('currency_code');
                             }
                             else{
-                                $currency_code = \App\Currency::findOrFail(\App\BusinessSetting::where('type', 'system_default_currency')->first()->value)->code;
+                                $currency_code = \App\Currency::findOrFail(get_setting('system_default_currency'))->code;
                             }
                         @endphp
                         <a href="javascript:void(0)" class="dropdown-toggle text-reset py-2 opacity-60" data-toggle="dropdown" data-display="static">

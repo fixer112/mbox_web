@@ -11,9 +11,30 @@
             <div class="col text-center text-md-left">
             </div>
             @php
-            $delivery_status = $order->orderDetails->first()->delivery_status;
-            $payment_status = $order->orderDetails->first()->payment_status;
+            $delivery_status = $order->delivery_status;
+            $payment_status = $order->payment_status;
             @endphp
+            
+            <!--Assign Delivery Boy-->
+            @if (\App\Addon::where('unique_identifier', 'delivery_boy')->first() != null && 
+                \App\Addon::where('unique_identifier', 'delivery_boy')->first()->activated)
+                <div class="col-md-3 ml-auto">
+                    <label for=assign_deliver_boy"">{{translate('Assign Deliver Boy')}}</label>
+                    @if($delivery_status == 'pending' || $delivery_status == 'picked_up')
+                    <select class="form-control aiz-selectpicker" data-live-search="true" data-minimum-results-for-search="Infinity" id="assign_deliver_boy">
+                        <option value="">{{translate('Select Delivery Boy')}}</option>
+                        @foreach($delivery_boys as $delivery_boy)
+                        <option value="{{ $delivery_boy->id }}" @if($order->assign_delivery_boy == $delivery_boy->id) selected @endif>
+                            {{ $delivery_boy->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @else
+                    <input type="text" class="form-control" value="{{ $order->delivery_boy->name }}">
+                    @endif
+                </div>
+            @endif
+            
             <div class="col-md-3 ml-auto">
                 <label for=update_payment_status"">{{translate('Payment Status')}}</label>
                 <select class="form-control aiz-selectpicker"  data-minimum-results-for-search="Infinity" id="update_payment_status">
@@ -23,13 +44,19 @@
             </div>
             <div class="col-md-3 ml-auto">
                 <label for=update_delivery_status"">{{translate('Delivery Status')}}</label>
-                <select class="form-control aiz-selectpicker"  data-minimum-results-for-search="Infinity" id="update_delivery_status">
-                    <option value="pending" @if ($delivery_status == 'pending') selected @endif>{{translate('Pending')}}</option>
-                    <option value="confirmed" @if ($delivery_status == 'confirmed') selected @endif>{{translate('Confirmed')}}</option>
-                    <option value="on_delivery" @if ($delivery_status == 'on_delivery') selected @endif>{{translate('On delivery')}}</option>
-                    <option value="delivered" @if ($delivery_status == 'delivered') selected @endif>{{translate('Delivered')}}</option>
-                    <option value="cancelled" @if ($delivery_status == 'cancelled') selected @endif>{{translate('Cancel')}}</option>
-                </select>
+                @if($delivery_status != 'delivered' && $delivery_status != 'cancelled')
+                    <select class="form-control aiz-selectpicker"  data-minimum-results-for-search="Infinity" id="update_delivery_status">
+                        <option value="pending" @if ($delivery_status == 'pending') selected @endif>{{translate('Pending')}}</option>
+                        <option value="confirmed" @if ($delivery_status == 'confirmed') selected @endif>{{translate('Confirmed')}}</option>
+                        <option value="picked_up" @if ($delivery_status == 'picked_up') selected @endif>{{translate('Picked Up')}}</option>
+                        <option value="on_the_way" @if ($delivery_status == 'on_the_way') selected @endif>{{translate('On The Way')}}</option>
+                        <!--<option value="on_delivery" @if ($delivery_status == 'on_delivery') selected @endif>{{translate('On delivery')}}</option>-->
+                        <option value="delivered" @if ($delivery_status == 'delivered') selected @endif>{{translate('Delivered')}}</option>
+                        <option value="cancelled" @if ($delivery_status == 'cancelled') selected @endif>{{translate('Cancel')}}</option>
+                    </select>
+                @else
+                    <input type="text" class="form-control" value="{{ $delivery_status }}">
+                @endif
             </div>
         </div>
         <div class="row gutters-5">
@@ -200,6 +227,18 @@
 
 @section('script')
     <script type="text/javascript">
+        $('#assign_deliver_boy').on('change', function(){
+            var order_id = {{ $order->id }};
+            var delivery_boy = $('#assign_deliver_boy').val();
+            $.post('{{ route('orders.delivery-boy-assign') }}', {
+                _token          :'{{ @csrf_token() }}',
+                order_id        :order_id,
+                delivery_boy    :delivery_boy
+            }, function(data){
+                AIZ.plugins.notify('success', '{{ translate('Delivery boy has been assigned') }}');
+            });
+        });
+        
         $('#update_delivery_status').on('change', function(){
             var order_id = {{ $order->id }};
             var status = $('#update_delivery_status').val();

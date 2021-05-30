@@ -51,7 +51,7 @@ class ForgotPasswordController extends Controller
                 $user->save();
 
                 $array['view'] = 'emails.verification';
-                $array['from'] = env('MAIL_USERNAME');
+                $array['from'] = env('MAIL_FROM_ADDRESS');
                 $array['subject'] = translate('Password Reset');
                 $array['content'] = translate('Verification Code is ').$user->verification_code;
 

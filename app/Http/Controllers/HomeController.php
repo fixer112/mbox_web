@@ -12,12 +12,10 @@ use App\Brand;
 use App\Product;
 use App\PickupPoint;
 use App\CustomerPackage;
-use App\Models\Cart;
 use App\CustomerProduct;
 use App\User;
 use App\Seller;
 use App\Shop;
-use App\Customorder;
 use App\Color;
 use App\Order;
 use App\BusinessSetting;
@@ -122,6 +120,9 @@ class HomeController extends Controller
         elseif(Auth::user()->user_type == 'customer'){
             return view('frontend.user.customer.dashboard');
         }
+        elseif(Auth::user()->user_type == 'delivery_boy'){
+            return view('delivery_boys.frontend.dashboard');
+        }
         else {
             abort(404);
         }
@@ -132,56 +133,13 @@ class HomeController extends Controller
         if(Auth::user()->user_type == 'customer'){
             return view('frontend.user.customer.profile');
         }
+        elseif(Auth::user()->user_type == 'delivery_boy'){
+            return view('delivery_boys.frontend.profile');
+        }
         elseif(Auth::user()->user_type == 'seller'){
             return view('frontend.user.seller.profile');
         }
     }
-    
-    
-    public function approveCustomOrder(Request $request) {
-        $customerOrder = $request['id'];
-
-
-        $order = Customorder::findOrFail($customerOrder);
-
-        // add to the user's cart here 
-
-        Cart::create([
-            'price' => $order->offer_price,
-            'user_id' => $order->user_id,
-            'owner_id' => $order->vendor_id,
-            'product_id' => $order->product_id,
-            'quantity' => $order->quantity
-        ]);
-
-        // Update the status of the custom order to 2 ! 2 means approved
-
-        $order->update([
-            'status' => 2
-        ]);
-
-        flash(translate('This product has now been added to the buyers cart'))->success();
-
-        return back();
-
-    }
-
-    public function rejectCustomOrder(Request $request) {
-        $customerOrder = $request['id'];
-
-
-        $order = Customorder::findOrFail($customerOrder);
-
-        $order->update([
-            'status' => 0
-        ]);
-
-        flash(translate('This custom order has now been rejected'))->success();
-
-        return back();
-
-    }
-
 
     public function customer_update_profile(Request $request)
     {
@@ -428,25 +386,9 @@ class HomeController extends Controller
             $search = $request->search;
             $products = $products->where('name', 'like', '%'.$search.'%');
         }
-        
         $products = $products->paginate(10);
-       
         return view('frontend.user.seller.products', compact('products', 'search'));
     }
-    
-// Seller custom order controller
-
-   public function sellercustom()
-    {
-        
-      $listorders = Customorder::where('vendor_id', Auth::user()->id)->where('status',1)->get();
-   
-        return view('frontend.user.seller.sellercustomorder',compact('listorders'));
-    }
-
-
-
-
 
     public function ajax_search(Request $request)
     {
@@ -467,7 +409,7 @@ class HomeController extends Controller
             }
         }
 
-        $products = filter_products(Product::where('published', 1)->where('name', 'like', '%'.$request->search.'%'))->get()->take(3);
+        $products = filter_products(Product::where('published', 1)->where('name', 'like', '%'.$request->search.'%'))->orWhere('tags', 'like', '%'.$request->search.'%')->get()->take(3);
 
         $categories = Category::where('name', 'like', '%'.$request->search.'%')->get()->take(3);
 
@@ -539,27 +481,25 @@ class HomeController extends Controller
         if($query != null){
             $searchController = new SearchController;
             $searchController->store($request);
-            $products = $products->where('name', 'like', '%'.$query.'%');
+            $products = $products->where('name', 'like', '%'.$query.'%')->orWhere('tags', 'like', '%'.$query.'%');
         }
 
-        if($sort_by != null){
-            switch ($sort_by) {
-                case 'newest':
-                    $products->orderBy('created_at', 'desc');
-                    break;
-                case 'oldest':
-                    $products->orderBy('created_at', 'asc');
-                    break;
-                case 'price-asc':
-                    $products->orderBy('unit_price', 'asc');
-                    break;
-                case 'price-desc':
-                    $products->orderBy('unit_price', 'desc');
-                    break;
-                default:
-                    // code...
-                    break;
-            }
+        switch ($sort_by) {
+            case 'newest':
+                $products->orderBy('created_at', 'desc');
+                break;
+            case 'oldest':
+                $products->orderBy('created_at', 'asc');
+                break;
+            case 'price-asc':
+                $products->orderBy('unit_price', 'asc');
+                break;
+            case 'price-desc':
+                $products->orderBy('unit_price', 'desc');
+                break;
+            default:
+                $products->orderBy('created_at', 'desc');
+                break;
         }
 
 
@@ -687,6 +627,7 @@ class HomeController extends Controller
         $product = Product::find($request->id);
         $str = '';
         $quantity = 0;
+        $tax = 0;
 
         if($request->has('color')){
             $str = $request['color'];
@@ -703,15 +644,15 @@ class HomeController extends Controller
             }
         }
 
-        if($str != null && $product->variant_product){
-            $product_stock = $product->stocks->where('variant', $str)->first();
-            $price = $product_stock->price;
-            $quantity = $product_stock->qty;
-        }
-        else{
-            $price = $product->unit_price;
-            $quantity = $product->current_stock;
-        }
+        $product_stock = $product->stocks->where('variant', $str)->first();
+        $price = $product_stock->price;
+        $quantity = $product_stock->qty;
+//        if($str != null && $product->variant_product){
+//        }
+//        else{
+//            $price = $product->unit_price;
+//            $quantity = $product->current_stock;
+//        }
 
         //Product Stock Visibility
         if($product->stock_visibility_state == 'text') {
@@ -743,12 +684,17 @@ class HomeController extends Controller
             }
         }
 
-        if($product->tax_type == 'percent'){
-            $price += ($price*$product->tax)/100;
+        foreach ($product->taxes as $product_tax) {
+            if($product_tax->tax_type == 'percent'){
+                $tax += ($price * $product_tax->tax) / 100;
+            }
+            elseif($product_tax->tax_type == 'amount'){
+                $tax += $product_tax->tax;
+            }
         }
-        elseif($product->tax_type == 'amount'){
-            $price += $product->tax;
-        }
+        
+        $price += $tax;
+        
         return array('price' => single_price($price*$request->quantity), 'quantity' => $quantity, 'digital' => $product->digital, 'variation' => $str);
     }
 
@@ -858,7 +804,7 @@ class HomeController extends Controller
         $verification_code = Str::random(32);
 
         $array['subject'] = 'Email Verification';
-        $array['from'] = env('MAIL_USERNAME');
+        $array['from'] = env('MAIL_FROM_ADDRESS');
         $array['content'] = 'Verify your account';
         $array['link'] = route('email_change.callback').'?new_email_verificiation_code='.$verification_code.'&email='.$email;
         $array['sender'] = Auth::user()->name;
@@ -953,31 +899,4 @@ class HomeController extends Controller
 
         return view('frontend.shop_listing', compact('shops'));
     }
-    
-     public function storecustomorder(Request $request) {
-        $result = new Customorder();
-        $result->user_id = $_POST['user_id'];
-        $result->offer_price = $_POST['offer_price'];
-        $result->product_id = $_POST['product_id'];
-        $result->product_name = $_POST['product_name'];
-        $result->quantity = $_POST['quanity'];
-        $result->vendor_id = $_POST['vendor_id'];
-        $result->user_name = $_POST['user_name'];
-        $result->product_slug = $_POST['product_slug'];
-     
-         $result->save();
-        flash(translate('Custom Message has been send to seller'))->success();
-        return back();
-       
-    }
-
-      
-    
-       
-       
-    
-    
-    
-    
-    
 }

@@ -66,31 +66,37 @@
                                                             <button class="btn btn-info btn-sm" onclick="autoFillCustomer()">{{ translate('Copy credentials') }}</button>
                                                         </td>
                                                     </tr>
+                                                    <tr>
+                                                        <td>{{ translate('Delivery Boy Account')}}</td>
+                                                        <td>
+                                                            <button class="btn btn-info btn-sm" onclick="autoFillDeliveryBoy()">{{ translate('Copy credentials') }}</button>
+                                                        </td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                     @endif
 
-                                    @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1 || \App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                                    @if(get_setting('google_login') == 1 || get_setting('facebook_login') == 1 || get_setting('twitter_login') == 1)
                                         <div class="separator mb-3">
                                             <span class="bg-white px-3 opacity-60">{{ translate('Or Login With')}}</span>
                                         </div>
                                         <ul class="list-inline social colored text-center mb-5">
-                                            @if (\App\BusinessSetting::where('type', 'facebook_login')->first()->value == 1)
+                                            @if (get_setting('facebook_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'facebook']) }}" class="facebook">
                                                         <i class="lab la-facebook-f"></i>
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if(\App\BusinessSetting::where('type', 'google_login')->first()->value == 1)
+                                            @if(get_setting('google_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'google']) }}" class="google">
                                                         <i class="lab la-google"></i>
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if (\App\BusinessSetting::where('type', 'twitter_login')->first()->value == 1)
+                                            @if (get_setting('twitter_login') == 1)
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('social.login', ['provider' => 'twitter']) }}" class="twitter">
                                                         <i class="lab la-twitter"></i>
@@ -121,6 +127,10 @@
         }
         function autoFillCustomer(){
             $('#email').val('customer@example.com');
+            $('#password').val('123456');
+        }
+        function autoFillDeliveryBoy(){
+            $('#email').val('deliveryboy@example.com');
             $('#password').val('123456');
         }
     </script>

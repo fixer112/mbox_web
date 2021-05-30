@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Attribute;
 use App\AttributeTranslation;
-use CoreComponentRepository;
+use Illuminate\Http\Request;
 
 class AttributeController extends Controller
 {
@@ -16,7 +15,7 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        CoreComponentRepository::instantiateShopRepository();
+        //CoreComponentRepository::instantiateShopRepository();
         $attributes = Attribute::orderBy('created_at', 'desc')->get();
         return view('backend.product.attribute.index', compact('attributes'));
     }
@@ -69,9 +68,9 @@ class AttributeController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        $lang      = $request->lang;
+        $lang = $request->lang;
         $attribute = Attribute::findOrFail($id);
-        return view('backend.product.attribute.edit', compact('attribute','lang'));
+        return view('backend.product.attribute.edit', compact('attribute', 'lang'));
     }
 
     /**
@@ -84,8 +83,8 @@ class AttributeController extends Controller
     public function update(Request $request, $id)
     {
         $attribute = Attribute::findOrFail($id);
-        if($request->lang == env("DEFAULT_LANGUAGE")){
-          $attribute->name = $request->name;
+        if ($request->lang == env("DEFAULT_LANGUAGE")) {
+            $attribute->name = $request->name;
         }
         $attribute->save();
 

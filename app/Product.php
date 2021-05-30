@@ -9,7 +9,7 @@ class Product extends Model {
 
     protected $fillable = [
         'name', 'added_by', 'user_id', 'category_id', 'brand_id', 'video_provider', 'video_link', 'unit_price',
-        'purchase_price', 'unit', 'slug', 'colors', 'choice_options', 'variations', 'current_stock', 'thumbnail_img'
+        'purchase_price', 'unit', 'slug', 'colors', 'choice_options', 'variations', 'thumbnail_img'
     ];
 
     public function getTranslation($field = '', $lang = false) {

@@ -255,7 +255,7 @@ class DigitalProductController extends Controller
         if(Auth::user()->user_type == 'admin' || Auth::user()->id == $product->user_id || $downloadable){
             $upload = Upload::findOrFail($product->file_name);
             if (env('FILESYSTEM_DRIVER') == "s3") {
-                return \Storage::disk('s3')->download('public/'.$upload->file_name, $upload->file_original_name.".".$upload->extension);
+                return \Storage::disk('s3')->download($upload->file_name, $upload->file_original_name.".".$upload->extension);
             }
             else {
                 if (file_exists(base_path('public/'.$upload->file_name))) {

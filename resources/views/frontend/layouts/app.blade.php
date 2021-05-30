@@ -62,6 +62,7 @@
     <script>
         var AIZ = AIZ || {};
         AIZ.local = {
+            nothing_selected: '{{ translate('Nothing selected') }}',
             nothing_found: '{{ translate('Nothing found') }}',
             choose_file: '{{ translate('Choose file') }}',
             file_selected: '{{ translate('File selected') }}',
@@ -96,7 +97,7 @@
         }
     </style>
 
-@if (\App\BusinessSetting::where('type', 'google_analytics')->first()->value == 1)
+@if (get_setting('google_analytics') == 1)
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('TRACKING_ID') }}"></script>
 
@@ -108,7 +109,7 @@
     </script>
 @endif
 
-@if (\App\BusinessSetting::where('type', 'facebook_pixel')->first()->value == 1)
+@if (get_setting('facebook_pixel') == 1)
     <!-- Facebook Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -302,7 +303,10 @@
         }
 
         function removeFromCart(key){
-            $.post('{{ route('cart.removeFromCart') }}', {_token: AIZ.data.csrf, key:key}, function(data){
+            $.post('{{ route('cart.removeFromCart') }}', {
+                _token  : AIZ.data.csrf, 
+                id      :  key
+            }, function(data){
                 updateNavCart();
                 $('#cart-summary').html(data);
                 AIZ.plugins.notify('success', 'Item has been removed from cart');

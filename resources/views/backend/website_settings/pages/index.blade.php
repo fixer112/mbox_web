@@ -28,29 +28,30 @@
         	@foreach (\App\Page::all() as $key => $page)
         	<tr>
         		<td>{{ $key+2 }}</td>
-        		<td><a href="{{ route('custom-pages.show_custom_page', $page->slug) }}" class="text-reset">{{ $page->title }}</a></td>
-        		<td>
-							@if($page->type == 'home_page')
-								{{ route('home') }}
-							@else
-								{{ route('home') }}/{{ $page->slug }}
-							@endif
-							</td>
+        		
+				@if($page->type == 'home_page')
+        			<td><a href="{{ route('custom-pages.show_custom_page', $page->slug) }}" class="text-reset">{{ translate($page->title) }}</a></td>
+					<td>{{ route('home') }}</td>
+				@else
+        			<td><a href="{{ route('custom-pages.show_custom_page', $page->slug) }}" class="text-reset">{{ $page->title }}</a></td>
+					<td>{{ route('home') }}/{{ $page->slug }}</td>
+				@endif
+				
         		<td class="text-right">
-								@if($page->type == 'home_page')
-									<a href="{{route('custom-pages.edit', ['id'=>$page->slug, 'lang'=>env('DEFAULT_LANGUAGE'), 'page'=>'home'] )}}" class="btn btn-icon btn-circle btn-sm btn-soft-primary" title="Edit">
-										<i class="las la-pen"></i>
-									</a>
-								@else
+					@if($page->type == 'home_page')
+						<a href="{{route('custom-pages.edit', ['id'=>$page->slug, 'lang'=>env('DEFAULT_LANGUAGE'), 'page'=>'home'] )}}" class="btn btn-icon btn-circle btn-sm btn-soft-primary" title="Edit">
+							<i class="las la-pen"></i>
+						</a>
+					@else
 	          			<a href="{{route('custom-pages.edit', ['id'=>$page->slug, 'lang'=>env('DEFAULT_LANGUAGE')] )}}" class="btn btn-icon btn-circle btn-sm btn-soft-primary" title="Edit">
-	    							<i class="las la-pen"></i>
-	    						</a>
-								@endif
-								@if($page->type == 'custom_page')
+							<i class="las la-pen"></i>
+						</a>
+					@endif
+					@if($page->type == 'custom_page')
           				<a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete" data-href="{{ route('custom-pages.destroy', $page->id)}} " title="{{ translate('Delete') }}">
           					<i class="las la-trash"></i>
           				</a>
-								@endif
+					@endif
         		</td>
         	</tr>
         	@endforeach

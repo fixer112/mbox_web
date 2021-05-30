@@ -76,7 +76,7 @@
                                     <span class="aiz-side-nav-text">{{ translate('In House Products') }}</span>
                                 </a>
                             </li>
-                            @if(\App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+                            @if(get_setting('vendor_system_activation') == 1)
                                 <li class="aiz-side-nav-item">
                                     <a href="{{route('products.seller')}}" class="aiz-side-nav-link {{ areActiveRoutes(['products.seller', 'products.seller.edit']) }}">
                                         <span class="aiz-side-nav-text">{{ translate('Seller Products') }}</span>
@@ -163,15 +163,43 @@
                     </ul>
                 </li>
                 
-                           <li class="aiz-side-nav-item">
-                    <a href="{{ url('admin/showcustom') }}" class="aiz-side-nav-link">
-                        <i class="las la-money-bill aiz-side-nav-icon"></i>
-                        <span class="aiz-side-nav-text">{{translate('Custom Order')}}</span>
-                    
-                    </a>
-                    <!--Submenu-->
-       
-                </li>
+                <!-- Deliver Boy Addon-->
+                @if (\App\Addon::where('unique_identifier', 'delivery_boy')->first() != null && \App\Addon::where('unique_identifier', 'delivery_boy')->first()->activated)
+                    @if(Auth::user()->user_type == 'admin' || in_array('1', json_decode(Auth::user()->staff->role->permissions)))
+                    <li class="aiz-side-nav-item">
+                        <a href="#" class="aiz-side-nav-link">
+                            <i class="las la-truck aiz-side-nav-icon"></i>
+                            <span class="aiz-side-nav-text">{{translate('Delivery Boy')}}</span>
+                            @if (env("DEMO_MODE") == "On")
+                            <span class="badge badge-inline badge-danger">Addon</span>
+                            @endif
+                            <span class="aiz-side-nav-arrow"></span>
+                        </a>
+                        <ul class="aiz-side-nav-list level-2">
+                            <li class="aiz-side-nav-item">
+                                <a href="{{route('delivery-boys.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['delivery-boys.index'])}}">
+                                    <span class="aiz-side-nav-text">{{translate('All Delivery Boy')}}</span>
+                                </a>
+                            </li>
+                            <li class="aiz-side-nav-item">
+                                <a href="{{route('delivery-boys.create')}}" class="aiz-side-nav-link {{ areActiveRoutes(['delivery-boys.create'])}}">
+                                    <span class="aiz-side-nav-text">{{translate('Add Delivery Boy')}}</span>
+                                </a>
+                            </li>
+                            <li class="aiz-side-nav-item">
+                                <a href="{{route('delivery-boy.cancel-request')}}" class="aiz-side-nav-link {{ areActiveRoutes(['delivery-boy.cancel-request'])}}">
+                                    <span class="aiz-side-nav-text">{{translate('Cancel Request')}}</span>
+                                </a>
+                            </li>
+                            <li class="aiz-side-nav-item">
+                                <a href="{{route('delivery-boy-configuration')}}" class="aiz-side-nav-link">
+                                    <span class="aiz-side-nav-text">{{translate('Configuration')}}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endif
+                @endif
 
                 <!-- Refund addon -->
                 @if (\App\Addon::where('unique_identifier', 'refund_request')->first() != null && \App\Addon::where('unique_identifier', 'refund_request')->first()->activated)
@@ -226,7 +254,7 @@
                                     <span class="aiz-side-nav-text">{{ translate('Customer list') }}</span>
                                 </a>
                             </li>
-                            @if(\App\BusinessSetting::where('type', 'classified_product')->first()->value == 1)
+                            @if(get_setting('classified_product') == 1)
                             <li class="aiz-side-nav-item">
                                 <a href="{{route('classified_products')}}" class="aiz-side-nav-link">
                                     <span class="aiz-side-nav-text">{{translate('Classified Products')}}</span>
@@ -243,7 +271,7 @@
                 @endif
 
                 <!-- Sellers -->
-                @if((Auth::user()->user_type == 'admin' || in_array('9', json_decode(Auth::user()->staff->role->permissions))) && \App\BusinessSetting::where('type', 'vendor_system_activation')->first()->value == 1)
+                @if((Auth::user()->user_type == 'admin' || in_array('9', json_decode(Auth::user()->staff->role->permissions))) && get_setting('vendor_system_activation') == 1)
                     <li class="aiz-side-nav-item">
                         <a href="#" class="aiz-side-nav-link">
                             <i class="las la-user aiz-side-nav-icon"></i>
@@ -294,14 +322,14 @@
                         </ul>
                     </li>
                 @endif
-
+                @if(Auth::user()->user_type == 'admin' || in_array('22', json_decode(Auth::user()->staff->role->permissions)))
                 <li class="aiz-side-nav-item">
                     <a href="{{ route('uploaded-files.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['uploaded-files.create'])}}">
                         <i class="las la-folder-open aiz-side-nav-icon"></i>
                         <span class="aiz-side-nav-text">{{ translate('Uploaded Files') }}</span>
                     </a>
                 </li>
-
+                @endif
                 <!-- Reports -->
                 @if(Auth::user()->user_type == 'admin' || in_array('10', json_decode(Auth::user()->staff->role->permissions)))
                     <li class="aiz-side-nav-item">
@@ -349,7 +377,7 @@
                         </ul>
                     </li>
                 @endif
-                
+                @if(Auth::user()->user_type == 'admin' || in_array('23', json_decode(Auth::user()->staff->role->permissions)))
                 <!--Blog System-->
                 <li class="aiz-side-nav-item">
                     <a href="#" class="aiz-side-nav-link">
@@ -370,6 +398,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
                 
                 <!-- marketing -->
                 @if(Auth::user()->user_type == 'admin' || in_array('11', json_decode(Auth::user()->staff->role->permissions)))
@@ -427,7 +456,7 @@
                           <span class="aiz-side-nav-arrow"></span>
                       </a>
                       <ul class="aiz-side-nav-list level-2">
-                          @if(Auth::user()->user_type == 'admin' || in_array('13', json_decode(Auth::user()->staff->role->permissions)))
+                          @if(Auth::user()->user_type == 'admin' || in_array('12', json_decode(Auth::user()->staff->role->permissions)))
                               @php
                                   $support_ticket = DB::table('tickets')
                                               ->where('viewed', 0)
@@ -445,7 +474,7 @@
                           @php
                               $conversation = \App\Conversation::where('receiver_id', Auth::user()->id)->where('receiver_viewed', '1')->get();
                           @endphp
-                          @if(Auth::user()->user_type == 'admin' || in_array('16', json_decode(Auth::user()->staff->role->permissions)))
+                          @if(Auth::user()->user_type == 'admin' || in_array('12', json_decode(Auth::user()->staff->role->permissions)))
                               <li class="aiz-side-nav-item">
                                   <a href="{{ route('conversations.admin_index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['conversations.admin_index', 'conversations.admin_show'])}}">
                                       <span class="aiz-side-nav-text">{{translate('Product Queries')}}</span>
@@ -530,7 +559,7 @@
                                       <span class="aiz-side-nav-text">{{translate('Offline Wallet Recharge')}}</span>
                                   </a>
                               </li>
-                              @if(\App\BusinessSetting::where('type', 'classified_product')->first()->value == 1)
+                              @if(get_setting('classified_product') == 1)
                                   <li class="aiz-side-nav-item">
                                       <a href="{{ route('offline_customer_package_payment_request.index') }}" class="aiz-side-nav-link">
                                           <span class="aiz-side-nav-text">{{translate('Offline Customer Package Payments')}}</span>
@@ -839,26 +868,27 @@
                         </ul>
                     </li>
                 @endif
-
+                @if(Auth::user()->user_type == 'admin' || in_array('24', json_decode(Auth::user()->staff->role->permissions)))
                 <li class="aiz-side-nav-item">
-                        <a href="#" class="aiz-side-nav-link">
-                            <i class="las la-user-tie aiz-side-nav-icon"></i>
-                            <span class="aiz-side-nav-text">{{translate('System')}}</span>
-                            <span class="aiz-side-nav-arrow"></span>
-                        </a>
-                        <ul class="aiz-side-nav-list level-2">
-                            <li class="aiz-side-nav-item">
-                                <a href="{{ route('system_update') }}" class="aiz-side-nav-link">
-                                    <span class="aiz-side-nav-text">{{translate('Update')}}</span>
-                                </a>
-                            </li>
-                            <li class="aiz-side-nav-item">
-                                <a href="{{route('system_server')}}" class="aiz-side-nav-link">
-                                    <span class="aiz-side-nav-text">{{translate('Server status')}}</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    <a href="#" class="aiz-side-nav-link">
+                        <i class="las la-user-tie aiz-side-nav-icon"></i>
+                        <span class="aiz-side-nav-text">{{translate('System')}}</span>
+                        <span class="aiz-side-nav-arrow"></span>
+                    </a>
+                    <ul class="aiz-side-nav-list level-2">
+                        <li class="aiz-side-nav-item">
+                            <a href="{{ route('system_update') }}" class="aiz-side-nav-link">
+                                <span class="aiz-side-nav-text">{{translate('Update')}}</span>
+                            </a>
+                        </li>
+                        <li class="aiz-side-nav-item">
+                            <a href="{{route('system_server')}}" class="aiz-side-nav-link">
+                                <span class="aiz-side-nav-text">{{translate('Server status')}}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
 
                 <!-- Addon Manager -->
                 @if(Auth::user()->user_type == 'admin' || in_array('21', json_decode(Auth::user()->staff->role->permissions)))

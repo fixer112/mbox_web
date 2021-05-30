@@ -12,19 +12,17 @@
                         <div class="col-auto fw-600">{{ translate('Remove')}}</div>
                     </div>
                     <ul class="list-group list-group-flush">
-
                         @php
                         $total = 0;
-                        $cart =  App\Models\Cart::where('user_id',  Auth::id())->orderBy('created_at', 'desc')->get()
                         @endphp
-                        @foreach ($cart as $key => $cartItem)
+                        @foreach ($carts as $key => $cartItem)
                             @php
-                                    $product = \App\Product::find($cartItem->product_id);
-                                    $total = $total + $cartItem->price*$cartItem->quantity;
-                                    $product_name_with_choice = $product ? $product->getTranslation('name') : '';
-                                    if ($cartItem->variation != null) {
-                                        $product_name_with_choice = $product ? $product->getTranslation('name') : ''.' - '.$cartItem->variation;
-                                    }
+                            $product = \App\Product::find($cartItem['product_id']);
+                            $total = $total + $cartItem['price'] * $cartItem['quantity'];
+                            $product_name_with_choice = $product->getTranslation('name');
+                            if ($cartItem['variation'] != null) {
+                                $product_name_with_choice = $product->getTranslation('name').' - '.$cartItem['variant'];
+                            }
                             @endphp
                             <li class="list-group-item px-0 px-lg-3">
                                 <div class="row gutters-5">
@@ -41,21 +39,21 @@
 
                                     <div class="col-lg col-4 order-1 order-lg-0 my-3 my-lg-0">
                                         <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Price')}}</span>
-                                        <span class="fw-600 fs-16">{{ single_price($cartItem->price) }}</span>
+                                        <span class="fw-600 fs-16">{{ single_price($cartItem['price']) }}</span>
                                     </div>
                                     <div class="col-lg col-4 order-2 order-lg-0 my-3 my-lg-0">
                                         <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Tax')}}</span>
-                                        <span class="fw-600 fs-16">{{ single_price($cartItem->tax) }}</span>
+                                        <span class="fw-600 fs-16">{{ single_price($cartItem['tax']) }}</span>
                                     </div>
 
                                     <div class="col-lg col-6 order-4 order-lg-0">
-                                        @if($cartItem->digital != 1)
+                                        @if($cartItem['digital'] != 1)
                                             <div class="row no-gutters align-items-center aiz-plus-minus mr-2 ml-0">
-                                                <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="minus" data-field="quantity[{{ $key }}]">
+                                                <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="minus" data-field="quantity[{{ $cartItem['id'] }}]">
                                                     <i class="las la-minus"></i>
                                                 </button>
-                                                <input type="text" name="quantity[{{ $key }}]" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $cartItem['quantity'] }}" min="1" max="10" readonly onchange="updateQuantity({{ $cartItem->id }}, this)">
-                                                <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="plus" data-field="quantity[{{ $key }}]">
+                                                <input type="number" name="quantity[{{ $cartItem['id'] }}]" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $cartItem['quantity'] }}" min="1" max="10" onchange="updateQuantity({{ $cartItem['id'] }}, this)">
+                                                <button class="btn col-auto btn-icon btn-sm btn-circle btn-light" type="button" data-type="plus" data-field="quantity[{{ $cartItem['id'] }}]">
                                                     <i class="las la-plus"></i>
                                                 </button>
                                             </div>
@@ -63,10 +61,10 @@
                                     </div>
                                     <div class="col-lg col-4 order-3 order-lg-0 my-3 my-lg-0">
                                         <span class="opacity-60 fs-12 d-block d-lg-none">{{ translate('Total')}}</span>
-                                        <span class="fw-600 fs-16 text-primary">{{ single_price(($cartItem->price+$cartItem->tax)*$cartItem->quantity) }}</span>
+                                        <span class="fw-600 fs-16 text-primary">{{ single_price(($cartItem['price']+$cartItem['tax'])*$cartItem['quantity']) }}</span>
                                     </div>
                                     <div class="col-lg-auto col-6 order-5 order-lg-0 text-right">
-                                        <a href="javascript:void(0)" onclick="removeFromCartView(event, {{ $cartItem->id }})" class="btn btn-icon btn-sm btn-soft-primary btn-circle">
+                                        <a href="javascript:void(0)" onclick="removeFromCartView(event, {{ $cartItem['id'] }})" class="btn btn-icon btn-sm btn-soft-primary btn-circle">
                                             <i class="las la-trash"></i>
                                         </a>
                                     </div>

@@ -131,13 +131,14 @@ class AizUploadController extends Controller
                         clearstatcache();
                         $size = $img->filesize();
 
-                        if (env('FILESYSTEM_DRIVER') == 's3') {
-                            Storage::disk('s3')->put($path, file_get_contents(base_path('public/').$path));
-                            unlink(base_path('public/').$path);
-                        }
                     } catch (\Exception $e) {
                         //dd($e);
                     }
+                }
+                
+                if (env('FILESYSTEM_DRIVER') == 's3') {
+                    Storage::disk('s3')->put($path, file_get_contents(base_path('public/').$path));
+                    unlink(base_path('public/').$path);
                 }
 
                 $upload->extension = $extension;

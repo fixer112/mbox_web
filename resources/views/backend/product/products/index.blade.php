@@ -99,9 +99,9 @@
                             <td>{{ $product->user->name }}</td>
                         @endif
                         <td>
-                            <strong>Num of Sale:</strong> {{ $product->num_of_sale }} {{translate('times')}} </br>
-                            <strong>Base Price:</strong> {{ single_price($product->unit_price) }} </br>
-                            <strong>Rating:</strong> {{ $product->rating }} </br>
+                            <strong>{{translate('Num of Sale')}}:</strong> {{ $product->num_of_sale }} {{translate('times')}} </br>
+                            <strong>{{translate('Base Price')}}:</strong> {{ single_price($product->unit_price) }} </br>
+                            <strong>{{translate('Rating')}}:</strong> {{ $product->rating }} </br>
                         </td>
                         <td>
                             @php
@@ -113,7 +113,8 @@
                                     }
                                 }
                                 else {
-                                    $qty = $product->current_stock;
+                                    //$qty = $product->current_stock;
+                                    $qty = $product->stocks->first()->qty;
                                     echo $qty;
                                 }
                             @endphp

@@ -2,7 +2,7 @@
 
   <div class="text-center">
       <span class="avatar avatar-xxl mb-3">
-          <img src="{{ uploaded_asset($seller->user->avatar_original) }}">
+          <img src="{{ uploaded_asset($seller->user->avatar_original) }}" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/avatar-place.png') }}';">
       </span>
       <h1 class="h5 mb-1">{{ $seller->user->name }}</h1>
       <p class="text-sm text-muted">{{ $seller->user->shop->name }}</p>

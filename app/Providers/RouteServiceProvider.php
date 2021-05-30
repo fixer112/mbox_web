@@ -57,11 +57,27 @@ class RouteServiceProvider extends ServiceProvider
 
     $this->mapSellerPackageRoutes();
 
+    $this->mapDeliveryBoyRoutes();
+
     $this->mapWebRoutes();
 
     //$this->mapInstallRoutes();
 
     //$this->mapUpdateRoutes();
+  }
+
+  /**
+   * Define the "delivery boy" routes for the application.
+   *
+   * These routes all receive session state, CSRF protection, etc.
+   *
+   * @return void
+   */
+  protected function mapDeliveryBoyRoutes()
+  {
+    Route::middleware('web')
+       ->namespace($this->namespace)
+       ->group(base_path('routes/delivery_boy.php'));
   }
 
   /**

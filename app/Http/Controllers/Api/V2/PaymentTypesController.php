@@ -59,6 +59,48 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
+        if (get_setting('bkash' == 1)) {
+            $payment_type = array();
+            $payment_type['payment_type'] = 'bkash';
+            $payment_type['payment_type_key'] = 'bkash';
+            $payment_type['image'] = static_asset('assets/img/cards/bkash.png');
+            $payment_type['name'] = "Bkash";
+            $payment_type['title'] = "Checkout with Bkash";
+            if($mode == 'wallet') {
+                $payment_type['title'] = "Recharge with Bkash";
+            }
+
+            $payment_types[] = $payment_type;
+        }
+
+        if (get_setting('nagad' == 1)) {
+            $payment_type = array();
+            $payment_type['payment_type'] = 'nagad';
+            $payment_type['payment_type_key'] = 'bkash';
+            $payment_type['image'] = static_asset('assets/img/cards/nagad.png');
+            $payment_type['name'] = "Nagad";
+            $payment_type['title'] = "Checkout with Nagad";
+            if($mode == 'wallet') {
+                $payment_type['title'] = "Recharge with Nagad";
+            }
+
+            $payment_types[] = $payment_type;
+        }
+
+        if (get_setting('sslcommerz_payment' == 1)) {
+            $payment_type = array();
+            $payment_type['payment_type'] = 'sslcommerz_payment';
+            $payment_type['payment_type_key'] = 'sslcommerz';
+            $payment_type['image'] = static_asset('assets/img/cards/sslcommerz.png');
+            $payment_type['name'] = "Sslcommerz";
+            $payment_type['title'] = "Checkout with Sslcommerz";
+            if($mode == 'wallet') {
+                $payment_type['title'] = "Recharge with Sslcommerz";
+            }
+
+            $payment_types[] = $payment_type;
+        }
+
         // you cannot recharge wallet by wallet or cash payment
         if($mode != 'wallet') {
             if ( get_setting('wallet_system' == 1)) {

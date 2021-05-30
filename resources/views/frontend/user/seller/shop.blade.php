@@ -47,7 +47,7 @@
                         <input type="text" class="form-control mb-3" placeholder="{{ translate('Address')}}" name="address" value="{{ $shop->address }}" required>
                     </div>
                 </div>
-                @if (\App\BusinessSetting::where('type', 'shipping_type')->first()->value == 'seller_wise_shipping')
+                @if (get_setting('shipping_type') == 'seller_wise_shipping')
                     <div class="row">
                         <div class="col-md-2">
                             <label>{{ translate('Shipping Cost')}} <span class="text-danger">*</span></label>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 @endif 
-                @if (\App\BusinessSetting::where('type', 'pickup_point')->first()->value == 1)
+                @if (get_setting('pickup_point') == 1)
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">{{ translate('Pickup Points') }}</label>
                     <div class="col-md-10">

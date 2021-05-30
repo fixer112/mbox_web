@@ -101,13 +101,8 @@
                             <td>
                                 @php
                                     $qty = 0;
-                                    if($product->variant_product){
-                                        foreach ($product->stocks as $key => $stock) {
-                                            $qty += $stock->qty;
-                                        }
-                                    }
-                                    else{
-                                        $qty = $product->current_stock;
+                                    foreach ($product->stocks as $key => $stock) {
+                                        $qty += $stock->qty;
                                     }
                                     echo $qty;
                                 @endphp

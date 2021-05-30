@@ -1,4 +1,4 @@
-@extends('backend.layouts.blank')
+@extends('backend.layouts.layout')
 
 @section('content')
 <section class="align-items-center d-flex h-100 bg-white">

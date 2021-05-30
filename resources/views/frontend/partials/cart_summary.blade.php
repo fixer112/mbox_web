@@ -2,7 +2,10 @@
     <div class="card-header">
         <h3 class="fs-16 fw-600 mb-0">{{translate('Summary')}}</h3>
         <div class="text-right">
-            <span class="badge badge-inline badge-primary">{{ count(Session::get('cart')->where('owner_id', Session::get('owner_id'))) }} {{translate('Items')}}</span>
+            <span class="badge badge-inline badge-primary">
+                {{ count($carts) }} 
+                {{translate('Items')}}
+            </span>
         </div>
     </div>
 
@@ -11,12 +14,13 @@
             @php
                 $total_point = 0;
             @endphp
-            @foreach (Session::get('cart')->where('owner_id', Session::get('owner_id')) as $key => $cartItem)
+            @foreach ($carts as $key => $cartItem)
                 @php
-                    $product = \App\Product::find($cartItem['id']);
-                    $total_point += $product->earn_point*$cartItem['quantity'];
+                    $product = \App\Product::find($cartItem['product_id']);
+                    $total_point += $product->earn_point * $cartItem['quantity'];
                 @endphp
             @endforeach
+            
             <div class="rounded px-2 mb-2 bg-soft-primary border-soft-primary border">
                 {{ translate("Total Club point") }}:
                 <span class="fw-700 float-right">{{ $total_point }}</span>
@@ -35,27 +39,14 @@
                     $tax = 0;
                     $shipping = 0;
                     $product_shipping_cost = 0;
-                    $shipping_region = Session::get('shipping_info')['city'];
+                    $shipping_region = $shipping_info['city'];
                 @endphp
-                @foreach (Session::get('cart')->where('owner_id', Session::get('owner_id')) as $key => $cartItem)
+                @foreach ($carts as $key => $cartItem)
                     @php
-                        $product = \App\Product::find($cartItem['id']);
-                        $subtotal += $cartItem['price']*$cartItem['quantity'];
-                        $tax += $cartItem['tax']*$cartItem['quantity'];
-                        
-                        if(isset($cartItem['shipping']) && is_array(json_decode($cartItem['shipping'], true))) {
-                            foreach(json_decode($cartItem['shipping'], true) as $shipping_info => $val) {
-                                if($shipping_region == $shipping_info) {
-                                    $product_shipping_cost = (double) $val;
-                                }
-                            }
-                        } else {
-                            $product_shipping_cost = (double) $cartItem['shipping'];
-                        }
-                        
-                        if($product->is_quantity_multiplied == 1 && get_setting('shipping_type') == 'product_wise_shipping') {
-                            $product_shipping_cost = $product_shipping_cost * $cartItem['quantity'];
-                        }
+                        $product = \App\Product::find($cartItem['product_id']);
+                        $subtotal += $cartItem['price'] * $cartItem['quantity'];
+                        $tax += $cartItem['tax'] * $cartItem['quantity'];
+                        $product_shipping_cost = $cartItem['shipping_cost'];
                         
                         $shipping += $product_shipping_cost;
                         
@@ -67,10 +58,12 @@
                     <tr class="cart_item">
                         <td class="product-name">
                             {{ $product_name_with_choice }}
-                            <strong class="product-quantity">× {{ $cartItem['quantity'] }}</strong>
+                            <strong class="product-quantity">
+                                × {{ $cartItem['quantity'] }}
+                            </strong>
                         </td>
                         <td class="product-total text-right">
-                            <span class="pl-4">{{ single_price($cartItem['price']*$cartItem['quantity']) }}</span>
+                            <span class="pl-4 pr-0">{{ single_price($cartItem['price']*$cartItem['quantity']) }}</span>
                         </td>
                     </tr>
                 @endforeach
@@ -110,11 +103,11 @@
                     </tr>
                 @endif
 
-                @if (Session::has('coupon_discount'))
+                @if ($carts->sum('discount') > 0)
                     <tr class="cart-shipping">
                         <th>{{translate('Coupon Discount')}}</th>
                         <td class="text-right">
-                            <span class="font-italic">{{ single_price(Session::get('coupon_discount')) }}</span>
+                            <span class="font-italic">{{ single_price($carts->sum('discount')) }}</span>
                         </td>
                     </tr>
                 @endif
@@ -124,8 +117,8 @@
                     if(Session::has('club_point')) {
                         $total -= Session::get('club_point');
                     }
-                    if(Session::has('coupon_discount')){
-                        $total -= Session::get('coupon_discount');
+                    if ($carts->sum('discount') > 0){
+                        $total -= $carts->sum('discount');
                     }
                 @endphp
 
@@ -152,7 +145,7 @@
                     </form>
                 </div>
             @else
-                @if(Auth::user()->point_balance > 0)
+                {{--@if(Auth::user()->point_balance > 0)
                     <div class="mt-3">
                         <p>
                             {{translate('Your club point is')}}:
@@ -170,31 +163,33 @@
                             </div>
                         </form>
                     </div>
-                @endif
+                @endif--}}
             @endif
         @endif
 
-        @if (Auth::check() && \App\BusinessSetting::where('type', 'coupon_system')->first()->value == 1)
-            @if (Session::has('coupon_discount'))
+        @if (Auth::check() && get_setting('coupon_system') == 1)
+            @if ($carts[0]['discount'] > 0)
                 <div class="mt-3">
-                    <form class="" action="{{ route('checkout.remove_coupon_code') }}" method="POST" enctype="multipart/form-data">
+                    <form class="" id="remove-coupon-form" action="{{ route('checkout.remove_coupon_code') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
                         <div class="input-group">
-                            <div class="form-control">{{ \App\Coupon::find(Session::get('coupon_id'))->code }}</div>
+                            <div class="form-control">{{ $carts[0]['coupon_code'] }}</div>
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary">{{translate('Change Coupon')}}</button>
+                                <button type="button" id="coupon-remove" class="btn btn-primary">{{translate('Change Coupon')}}</button>
                             </div>
                         </div>
                     </form>
                 </div>
             @else
                 <div class="mt-3">
-                    <form class="" action="{{ route('checkout.apply_coupon_code') }}" method="POST" enctype="multipart/form-data">
+                    <form class="" id="apply-coupon-form" action="{{ route('checkout.apply_coupon_code') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="owner_id" value="{{ $carts[0]['owner_id'] }}">
                         <div class="input-group">
                             <input type="text" class="form-control" name="code" placeholder="{{translate('Have coupon code? Enter here')}}" required>
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary">{{translate('Apply')}}</button>
+                                <button type="button" id="coupon-apply" class="btn btn-primary">{{translate('Apply')}}</button>
                             </div>
                         </div>
                     </form>

@@ -46,13 +46,14 @@ class PublicSslCommerzPaymentController extends Controller
                     #End to save these value  in session to pick in success page.
 
                     # CUSTOMER INFORMATION
-                    $post_data['cus_name'] = $request->session()->get('shipping_info')['name'];
-                    $post_data['cus_add1'] = $request->session()->get('shipping_info')['address'];
-                    $post_data['cus_city'] = $request->session()->get('shipping_info')['city'];
-                    $post_data['cus_postcode'] = $request->session()->get('shipping_info')['postal_code'];
-                    $post_data['cus_country'] = $request->session()->get('shipping_info')['country'];
-                    $post_data['cus_phone'] = $request->session()->get('shipping_info')['phone'];
-                    $post_data['cus_email'] = $request->session()->get('shipping_info')['email'];
+//                    $post_data['cus_name'] = $request->session()->get('shipping_info')['name'];
+//                    $post_data['cus_add1'] = $request->session()->get('shipping_info')['address'];
+//                    $post_data['cus_city'] = $request->session()->get('shipping_info')['city'];
+//                    $post_data['cus_postcode'] = $request->session()->get('shipping_info')['postal_code'];
+//                    $post_data['cus_country'] = $request->session()->get('shipping_info')['country'];
+//                    $post_data['cus_phone'] = $request->session()->get('shipping_info')['phone'];
+//                    $post_data['cus_email'] = $request->session()->get('shipping_info')['email'];
+                    
                 }
                 elseif (Session::get('payment_type') == 'wallet_payment') {
                     $post_data = array();
@@ -69,15 +70,7 @@ class PublicSslCommerzPaymentController extends Controller
                     // $_SESSION['payment_values']['payment_data']=$request->session()->get('payment_data');
                     // $_SESSION['payment_values']['payment_type']=$request->session()->get('payment_type');
                     #End to save these value  in session to pick in success page.
-
-                    # CUSTOMER INFORMATION
-                    $user = Auth::user();
-                    $post_data['cus_name'] = $user->name;
-                    $post_data['cus_add1'] = $user->address;
-                    $post_data['cus_city'] = $user->city;
-                    $post_data['cus_postcode'] = $user->postal_code;
-                    $post_data['cus_country'] = $user->country;
-                    $post_data['cus_phone'] = $user->phone;
+                    
                 }
                 elseif (Session::get('payment_type') == 'customer_package_payment') {
                     $customer_package = CustomerPackage::findOrFail(Session::get('payment_data')['customer_package_id']);
@@ -95,15 +88,6 @@ class PublicSslCommerzPaymentController extends Controller
                     // $_SESSION['payment_values']['payment_data']=$request->session()->get('payment_data');
                     // $_SESSION['payment_values']['payment_type']=$request->session()->get('payment_type');
                     #End to save these value  in session to pick in success page.
-
-                    # CUSTOMER INFORMATION
-                    $user = Auth::user();
-                    $post_data['cus_name'] = $user->name;
-                    $post_data['cus_add1'] = $user->address;
-                    $post_data['cus_city'] = $user->city;
-                    $post_data['cus_postcode'] = $user->postal_code;
-                    $post_data['cus_country'] = $user->country;
-                    $post_data['cus_phone'] = $user->phone;
                 }
                 elseif (Session::get('payment_type') == 'seller_package_payment') {
                     $seller_package = SellerPackage::findOrFail(Session::get('payment_data')['seller_package_id']);
@@ -122,15 +106,17 @@ class PublicSslCommerzPaymentController extends Controller
                     // $_SESSION['payment_values']['payment_type']=$request->session()->get('payment_type');
                     #End to save these value  in session to pick in success page.
 
-                    # CUSTOMER INFORMATION
-                    $user = Auth::user();
-                    $post_data['cus_name'] = $user->name;
-                    $post_data['cus_add1'] = $user->address;
-                    $post_data['cus_city'] = $user->city;
-                    $post_data['cus_postcode'] = $user->postal_code;
-                    $post_data['cus_country'] = $user->country;
-                    $post_data['cus_phone'] = $user->phone;
                 }
+                
+                # CUSTOMER INFORMATION
+                $user = Auth::user();
+                $post_data['cus_name'] = $user->name;
+                $post_data['cus_add1'] = $user->address;
+                $post_data['cus_city'] = $user->city;
+                $post_data['cus_postcode'] = $user->postal_code;
+                $post_data['cus_country'] = $user->country;
+                $post_data['cus_phone'] = $user->phone;
+                $post_data['cus_email'] = $user->email;
             }
 
             $server_name=$request->root()."/";
