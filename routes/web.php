@@ -1,17 +1,20 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
-  |--------------------------------------------------------------------------
-  | Web Routes
-  |--------------------------------------------------------------------------
-  |
-  | Here is where you can register web routes for your application. These
-  | routes are loaded by the RouteServiceProvider within a group which
-  | contains the "web" middleware group. Now create something great!
-  |
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
  */
 // use App\Mail\SupportMailManager;
 //demo
+Route::get('/test', 'Controller@test');
 Route::get('/demo/cron_1', 'DemoController@cron_1');
 Route::get('/demo/cron_2', 'DemoController@cron_2');
 Route::get('/convert_assets', 'DemoController@convert_assets');
@@ -20,9 +23,7 @@ Route::get('/convert_tax', 'DemoController@convertTaxes');
 Route::get('/insert_product_variant_forcefully/{id_min}/{id_max}', 'DemoController@insert_product_variant_forcefully');
 Route::get('/update_seller_id_in_orders/{id_min}/{id_max}', 'DemoController@update_seller_id_in_orders');
 
-
-
-Route::get('/refresh-csrf', function() {
+Route::get('/refresh-csrf', function () {
     return csrf_token();
 });
 Route::post('/aiz-uploader', 'AizUploadController@show_uploader');
@@ -31,14 +32,12 @@ Route::get('/aiz-uploader/get_uploaded_files', 'AizUploadController@get_uploaded
 Route::post('/aiz-uploader/get_file_by_ids', 'AizUploadController@get_preview_files');
 Route::get('/aiz-uploader/download/{id}', 'AizUploadController@attachment_download')->name('download_attachment');
 
-
 Auth::routes(['verify' => true]);
 Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout');
 Route::get('/email/resend', 'Auth\VerificationController@resend')->name('verification.resend');
 Route::get('/verification-confirmation/{code}', 'Auth\VerificationController@verification_confirmation')->name('email.verification.confirmation');
 Route::get('/email_change/callback', 'HomeController@email_change_callback')->name('email_change.callback');
 Route::post('/password/reset/email/submit', 'HomeController@reset_password_with_code')->name('password.update');
-
 
 Route::post('/language', 'LanguageController@changeLanguage')->name('language.change');
 Route::post('/currency', 'CurrencyController@changeCurrency')->name('currency.change');
@@ -63,11 +62,9 @@ Route::post('/category/nav-element-list', 'HomeController@get_category_items')->
 Route::get('/flash-deals', 'HomeController@all_flash_deals')->name('flash-deals');
 Route::get('/flash-deal/{slug}', 'HomeController@flash_deal_details')->name('flash-deal-details');
 
-
-Route::get('/sitemap.xml', function() {
+Route::get('/sitemap.xml', function () {
     return base_path('sitemap.xml');
 });
-
 
 Route::get('/customer-products', 'CustomerProductController@customer_products_listing')->name('customer.products');
 Route::get('/customer-products?category={category_slug}', 'CustomerProductController@search')->name('customer_products.category');
@@ -96,7 +93,7 @@ Route::post('/cart/removeFromCart', 'CartController@removeFromCart')->name('cart
 Route::post('/cart/updateQuantity', 'CartController@updateQuantity')->name('cart.updateQuantity');
 
 //Checkout Routes
-Route::group(['middleware' => ['checkout']], function() {
+Route::group(['middleware' => ['checkout']], function () {
     Route::get('/checkout', 'CheckoutController@get_shipping_info')->name('checkout.shipping_info');
     Route::any('/checkout/delivery_info', 'CheckoutController@store_shipping_info')->name('checkout.store_shipping_infostore');
     Route::post('/checkout/payment_select', 'CheckoutController@store_delivery_info')->name('checkout.store_delivery_info');
@@ -147,7 +144,7 @@ Route::get('/supportpolicy', 'HomeController@supportpolicy')->name('supportpolic
 Route::get('/terms', 'HomeController@terms')->name('terms');
 Route::get('/privacypolicy', 'HomeController@privacypolicy')->name('privacypolicy');
 
-Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
+Route::group(['middleware' => ['user', 'verified', 'unbanned']], function () {
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
     Route::get('/profile', 'HomeController@profile')->name('profile');
     Route::post('/new-user-verification', 'HomeController@new_verify')->name('user.new.verify');
@@ -179,7 +176,7 @@ Route::group(['middleware' => ['user', 'verified', 'unbanned']], function() {
 
 Route::get('/customer_products/destroy/{id}', 'CustomerProductController@destroy')->name('customer_products.destroy');
 
-Route::group(['prefix' => 'seller', 'middleware' => ['seller', 'verified', 'user']], function() {
+Route::group(['prefix' => 'seller', 'middleware' => ['seller', 'verified', 'user']], function () {
     Route::get('/products', 'HomeController@seller_product_list')->name('seller.products');
     Route::get('/product/upload', 'HomeController@show_product_upload_form')->name('seller.products.upload');
     Route::get('/product/{id}/edit', 'HomeController@show_product_edit_form')->name('seller.products.edit');
@@ -196,7 +193,7 @@ Route::group(['prefix' => 'seller', 'middleware' => ['seller', 'verified', 'user
     Route::get('/digitalproducts/{id}/edit', 'HomeController@show_digital_product_edit_form')->name('seller.digitalproducts.edit');
 });
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth']], function () {
     Route::post('/products/store/', 'ProductController@store')->name('products.store');
     Route::post('/products/update/{id}', 'ProductController@update')->name('products.update');
     Route::get('/products/destroy/{id}', 'ProductController@destroy')->name('products.destroy');
@@ -214,7 +211,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/orders/update_delivery_status', 'OrderController@update_delivery_status')->name('orders.update_delivery_status');
     Route::post('/orders/update_payment_status', 'OrderController@update_payment_status')->name('orders.update_payment_status');
     Route::post('/orders/delivery-boy-assign', 'OrderController@assign_delivery_boy')->name('orders.delivery-boy-assign');
-    
+
     Route::resource('/reviews', 'ReviewController');
 
     Route::resource('/withdraw_requests', 'SellerWithdrawRequestController');
@@ -232,7 +229,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/bulk-product-upload', 'ProductBulkUploadController@bulk_upload')->name('bulk_product_upload');
     Route::get('/product-csv-download/{type}', 'ProductBulkUploadController@import_product')->name('product_csv.download');
     Route::get('/vendor-product-csv-download/{id}', 'ProductBulkUploadController@import_vendor_product')->name('import_vendor_product.download');
-    Route::group(['prefix' => 'bulk-upload/download'], function() {
+    Route::group(['prefix' => 'bulk-upload/download'], function () {
         Route::get('/category', 'ProductBulkUploadController@pdf_download_category')->name('pdf.download_category');
         Route::get('/brand', 'ProductBulkUploadController@pdf_download_brand')->name('pdf.download_brand');
         Route::get('/seller', 'ProductBulkUploadController@pdf_download_seller')->name('pdf.download_seller');
@@ -310,11 +307,9 @@ Route::get('/bkash/success', 'BkashController@success')->name('bkash.success');
 //Nagad
 Route::get('/nagad/callback', 'NagadController@verify')->name('nagad.callback');
 
-
 //Blog Section
 Route::get('/blog', 'BlogController@all_blog')->name('blog');
 Route::get('/blog/{slug}', 'BlogController@blog_details')->name('blog.details');
-
 
 //mobile app balnk page for webview
 Route::get('/mobile-page/{slug}', 'PageController@mobile_custom_page')->name('mobile.custom-pages');
