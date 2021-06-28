@@ -44,7 +44,7 @@ class InvoiceController extends Controller
         }elseif($currency_code == 'ILS'){
             // Israeli font
             $font_family = "'Varela Round','sans-serif'";
-        }elseif($currency_code == 'AED' || $currency_code == 'EGP' || $language_code == 'sa'){
+        }elseif($currency_code == 'AED' || $currency_code == 'EGP' || $language_code == 'sa' || $currency_code == 'IQD'){
             // middle east/arabic font
             $font_family = "'XBRiyaz','sans-serif'";
         }else{

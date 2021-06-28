@@ -143,34 +143,73 @@
     		</div>
             <div class="card">
     			<div class="card-header">
-    				<h6 class="fw-600 mb-0">{{ translate('Custom Script') }}</h6>
+    				<h6 class="fw-600 mb-0">{{ translate('Website Popup') }}</h6>
     			</div>
     			<div class="card-body">
     				<form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
     					@csrf
     					<div class="form-group row">
-    						<label class="col-md-3 col-from-label">{{ translate('Header custom script - before </head>') }}</label>
+                            <label class="col-md-3 col-from-label">{{translate('Show website popup?')}}</label>
                             <div class="col-md-8">
-        						<input type="hidden" name="types[]" value="header_script">
-        						<textarea name="header_script" rows="4" class="form-control" placeholder="<script>&#10;...&#10;</script>">{{ get_setting('header_script') }}</textarea>
-                                <small>{{ translate('Write script with <script> tag') }}</small>
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="hidden" name="types[]" value="show_website_popup">
+                                    <input type="checkbox" name="show_website_popup" @if( get_setting('show_website_popup') == 'on') checked @endif>
+                                    <span></span>
+                                </label>
                             </div>
-    					</div>
-    					@csrf
-    					<div class="form-group row">
-    						<label class="col-md-3 col-from-label">{{ translate('Footer custom script - before </body>') }}</label>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{ translate('Popup content') }}</label>
                             <div class="col-md-8">
-        						<input type="hidden" name="types[]" value="footer_script">
-        						<textarea name="footer_script" rows="4" class="form-control" placeholder="<script>&#10;...&#10;</script>">{{ get_setting('footer_script') }}</textarea>
-                                <small>{{ translate('Write script with <script> tag') }}</small>
+                                <input type="hidden" name="types[]" value="website_popup_content">
+                                <textarea name="website_popup_content" rows="4" class="aiz-text-editor form-control" >{{ get_setting('website_popup_content') }}</textarea>
                             </div>
-    					</div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Show Subscriber form?')}}</label>
+                            <div class="col-md-8">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="hidden" name="types[]" value="show_subscribe_form">
+                                    <input type="checkbox" name="show_subscribe_form" @if( get_setting('show_subscribe_form') == 'on') checked @endif>
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
     					<div class="text-right">
     						<button type="submit" class="btn btn-primary">{{ translate('Update') }}</button>
     					</div>
     				</form>
     			</div>
     		</div>
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="fw-600 mb-0">{{ translate('Custom Script') }}</h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{ translate('Header custom script - before </head>') }}</label>
+                            <div class="col-md-8">
+                                <input type="hidden" name="types[]" value="header_script">
+                                <textarea name="header_script" rows="4" class="form-control" placeholder="<script>&#10;...&#10;</script>">{{ get_setting('header_script') }}</textarea>
+                                <small>{{ translate('Write script with <script> tag') }}</small>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{ translate('Footer custom script - before </body>') }}</label>
+                            <div class="col-md-8">
+                                <input type="hidden" name="types[]" value="footer_script">
+                                <textarea name="footer_script" rows="4" class="form-control" placeholder="<script>&#10;...&#10;</script>">{{ get_setting('footer_script') }}</textarea>
+                                <small>{{ translate('Write script with <script> tag') }}</small>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">{{ translate('Update') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     	</div>
     </div>
 

@@ -81,9 +81,9 @@
                             <td>{{ $key+1 }}</td>
                             <td><a href="{{ route('product', $product->slug) }}" target="_blank">{{   $product->getTranslation('name')  }}</a></td>
                             <td>
-                                <a href="{{ route('product', $product->slug) }}" target="_blank" class="text-reset">
-                                    {{ $product->getTranslation('name') }}
-                                </a>
+                                @if ($product->category != null)
+                                    {{ $product->category->getTranslation('name') }}
+                                @endif
                             </td>
                             <td>{{ $product->unit_price }}</td>
                             <td><label class="aiz-switch aiz-switch-success mb-0">

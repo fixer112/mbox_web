@@ -28,7 +28,7 @@ class ProductsExport implements FromCollection, WithMapping, WithHeadings
             'unit_price',
             'purchase_price',
             'unit',
-//            'current_stock',
+            'current_stock',
             'meta_title',
             'meta_description',
         ];
@@ -39,6 +39,10 @@ class ProductsExport implements FromCollection, WithMapping, WithHeadings
     */
     public function map($product): array
     {
+        $qty = 0;
+        foreach ($product->stocks as $key => $stock) {
+            $qty += $stock->qty;
+        }
         return [
             $product->name,
             $product->added_by,
@@ -51,6 +55,7 @@ class ProductsExport implements FromCollection, WithMapping, WithHeadings
             $product->purchase_price,
             $product->unit,
 //            $product->current_stock,
+            $qty,
         ];
     }
 }

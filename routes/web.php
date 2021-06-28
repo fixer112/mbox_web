@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Route;
  */
 // use App\Mail\SupportMailManager;
 //demo
-Route::get('/test', 'Controller@test');
 Route::get('/demo/cron_1', 'DemoController@cron_1');
 Route::get('/demo/cron_2', 'DemoController@cron_2');
 Route::get('/convert_assets', 'DemoController@convert_assets');

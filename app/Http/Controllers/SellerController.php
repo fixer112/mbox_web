@@ -165,6 +165,16 @@ class SellerController extends Controller
             return back();
         }
     }
+    
+    public function bulk_seller_delete(Request $request) {
+        if($request->id) {
+            foreach ($request->id as $seller_id) {
+                $this->destroy($seller_id);
+            }
+        }
+        
+        return 1;
+    }
 
     public function show_verification_request($id)
     {

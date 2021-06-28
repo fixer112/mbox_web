@@ -68,10 +68,10 @@ class CartController extends Controller
                 if (!empty($shop_items_raw_data)) {
                     foreach ($shop_items_raw_data as $shop_items_raw_data_item) {
                         $product = Product::where('id', $shop_items_raw_data_item["product_id"])->first();
-                        $shop_items_data_item["id"] = (int) $shop_items_raw_data_item["id"];
-                        $shop_items_data_item["owner_id"] =(int) $shop_items_raw_data_item["owner_id"];
-                        $shop_items_data_item["user_id"] =(int) $shop_items_raw_data_item["user_id"];
-                        $shop_items_data_item["product_id"] =(int) $shop_items_raw_data_item["product_id"];
+                        $shop_items_data_item["id"] = intval($shop_items_raw_data_item["id"]) ;
+                        $shop_items_data_item["owner_id"] =intval($shop_items_raw_data_item["owner_id"]) ;
+                        $shop_items_data_item["user_id"] =intval($shop_items_raw_data_item["user_id"]) ;
+                        $shop_items_data_item["product_id"] =intval($shop_items_raw_data_item["product_id"]) ;
                         $shop_items_data_item["product_name"] = $product->name;
                         $shop_items_data_item["product_thumbnail_image"] = api_asset($product->thumbnail_img);
                         $shop_items_data_item["variation"] = $shop_items_raw_data_item["variation"];
@@ -79,9 +79,9 @@ class CartController extends Controller
                         $shop_items_data_item["currency_symbol"] = $currency_symbol;
                         $shop_items_data_item["tax"] =(double) $shop_items_raw_data_item["tax"];
                         $shop_items_data_item["shipping_cost"] =(double) $shop_items_raw_data_item["shipping_cost"];
-                        $shop_items_data_item["quantity"] =(int) $shop_items_raw_data_item["quantity"];
-                        $shop_items_data_item["lower_limit"] =(int) $product->min_qty;
-                        $shop_items_data_item["upper_limit"] =(int) $product->stocks->where('variant', $shop_items_raw_data_item['variation'])->first()->qty;
+                        $shop_items_data_item["quantity"] =intval($shop_items_raw_data_item["quantity"]) ;
+                        $shop_items_data_item["lower_limit"] = intval($product->min_qty) ;
+                        $shop_items_data_item["upper_limit"] = intval($product->stocks->where('variant', $shop_items_raw_data_item['variation'])->first()->qty) ;
 
                         $shop_items_data[] = $shop_items_data_item;
 
@@ -108,81 +108,6 @@ class CartController extends Controller
         return response()->json($shops);
     }
 
-//    public function add(Request $request)
-//    {
-//        $product = Product::findOrFail($request->id);
-//
-//        $variant = $request->variant;
-//        $tax = 0;
-//
-//        if ($variant == '')
-//            $price = $product->unit_price;
-//        else {
-//            $product_stock = $product->stocks->where('variant', $variant)->first();
-//            $price = $product_stock->price;
-//        }
-//
-//        //discount calculation based on flash deal and regular discount
-//        //calculation of taxes
-//        $flash_deals = FlashDeal::where('status', 1)->get();
-//        $inFlashDeal = false;
-//        foreach ($flash_deals as $flash_deal) {
-//            if ($flash_deal != null && $flash_deal->status == 1 && strtotime(date('d-m-Y')) >= $flash_deal->start_date && strtotime(date('d-m-Y')) <= $flash_deal->end_date && FlashDealProduct::where('flash_deal_id', $flash_deal->id)->where('product_id', $product->id)->first() != null) {
-//                $flash_deal_product = FlashDealProduct::where('flash_deal_id', $flash_deal->id)->where('product_id', $product->id)->first();
-//                if ($flash_deal_product->discount_type == 'percent') {
-//                    $price -= ($price * $flash_deal_product->discount) / 100;
-//                } elseif ($flash_deal_product->discount_type == 'amount') {
-//                    $price -= $flash_deal_product->discount;
-//                }
-//                $inFlashDeal = true;
-//                break;
-//            }
-//        }
-//        if (!$inFlashDeal) {
-//            if ($product->discount_type == 'percent') {
-//                $price -= ($price * $product->discount) / 100;
-//            } elseif ($product->discount_type == 'amount') {
-//                $price -= $product->discount;
-//            }
-//        }
-//
-//        if ($product->tax_type == 'percent') {
-//            $tax = ($price * $product->tax) / 100;
-//        } elseif ($product->tax_type == 'amount') {
-//            $tax = $product->tax;
-//        }
-//
-//        if ($product->min_qty > $request->quantity) {
-//            return response()->json(['result' => false, 'message' => "Minimum {$product->min_qty} item(s) should be ordered"], 200);
-//        }
-//
-//        $stock = $product->stocks->where('variant', $variant)->first()->qty;
-//        $variant_string = $variant != null && $variant != "" ? "for ($variant)" : "";
-//        if ($stock < $request->quantity) {
-//            if ($stock == 0) {
-//                return response()->json(['result' => false, 'message' => "Stock out"], 200);
-//            } else {
-//                return response()->json(['result' => false, 'message' => "Only {$stock} item(s) are available {$variant_string}"], 200);
-//            }
-//        }
-//
-//        Cart::updateOrCreate([
-//            'user_id' => $request->user_id,
-//            'owner_id' => $product->user_id,
-//            'product_id' => $request->id,
-//            'variation' => $variant
-//        ], [
-//            'price' => $price,
-//            'tax' => $tax,
-//            'shipping_cost' => 0,
-//            'quantity' => DB::raw("quantity + $request->quantity")
-//        ]);
-//
-//        return response()->json([
-//            'result' => true,
-//            'message' => 'Product added to cart successfully'
-//        ]);
-//    }
 
     public function add(Request $request)
     {

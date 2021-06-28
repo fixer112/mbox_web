@@ -201,32 +201,23 @@ class ProductController extends Controller
         $str = '';
         $tax = 0;
 
-        if ($request->has('color')) {
+        if ($request->has('color') && $request->color != "") {
             $str = Color::where('code', '#' . $request->color)->first()->name;
         }
 
-
-        //$str .= $str != '' ? '-' . str_replace(',', '-', $request->variants) : str_replace(',', '-', $request->variants);
-
         $var_str = str_replace(',', '-', $request->variants);
+        $var_str = str_replace(' ', '', $var_str);
 
         if ($var_str != "") {
-            $str .= '-'.$var_str;
+            $temp_str = $str == "" ? $var_str : '-'.$var_str;
+            $str .= $temp_str;
         }
+
 
         $product_stock = $product->stocks->where('variant', $str)->first();
         $price = $product_stock->price;
         $stockQuantity = $product_stock->qty;
 
-
-        /*if ($str != null && $product->variant_product) {
-            $product_stock = $product->stocks->where('variant', $str)->first();
-            $price = $product_stock->price;
-            $stockQuantity = $product_stock->qty;
-        } else {
-            $price = $product->unit_price;
-            $stockQuantity = $product->current_stock;
-        }*/
 
         //discount calculation
         $flash_deals = FlashDeal::where('status', 1)->get();
@@ -262,7 +253,7 @@ class ProductController extends Controller
             'variant' => $str,
             'price' => (double)convert_price($price),
             'price_string' => format_price(convert_price($price)),
-            'stock' => $stockQuantity
+            'stock' => intval($stockQuantity)
         ]);
     }
 

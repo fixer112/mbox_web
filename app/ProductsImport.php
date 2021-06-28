@@ -3,38 +3,72 @@
 namespace App;
 
 use App\Product;
+use App\ProductStock;
 use App\User;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Str;
 use Auth;
 
-class ProductsImport implements ToModel, WithHeadingRow, WithValidation
+//class ProductsImport implements ToModel, WithHeadingRow, WithValidation
+class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
 {
-    public function model(array $row)
-    {
-        return new Product([
-           'name'     => $row['name'],
-           'added_by'    => Auth::user()->user_type == 'seller' ? 'seller' : 'admin',
-           'user_id'    => Auth::user()->user_type == 'seller' ? Auth::user()->id : User::where('user_type', 'admin')->first()->id,
-           'category_id'    => $row['category_id'],
-           'brand_id'    => $row['brand_id'],
-           'video_provider'    => $row['video_provider'],
-           'video_link'    => $row['video_link'],
-           'unit_price'    => $row['unit_price'],
-           'purchase_price'    => $row['purchase_price'] == null ? $row['unit_price'] : $row['purchase_price'],
-           'unit'    => $row['unit'],
-//           'current_stock' => $row['current_stock'],
-           'meta_title' => $row['meta_title'],
-           'meta_description' => $row['meta_description'],
-           'colors' => json_encode(array()),
-           'choice_options' => json_encode(array()),
-           'variations' => json_encode(array()),
-           'slug' => preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $row['slug'])).'-'.Str::random(5),
-           'thumbnail_img' => $this->downloadThumbnail($row['thumbnail_img']),
-        ]);
+    public function collection(Collection $rows) {
+        foreach ($rows as $row) {
+            $productId = Product::create([
+                        'name' => $row['name'],
+                        'added_by' => Auth::user()->user_type == 'seller' ? 'seller' : 'admin',
+                        'user_id' => Auth::user()->user_type == 'seller' ? Auth::user()->id : User::where('user_type', 'admin')->first()->id,
+                        'category_id' => $row['category_id'],
+                        'brand_id' => $row['brand_id'],
+                        'video_provider' => $row['video_provider'],
+                        'video_link' => $row['video_link'],
+                        'unit_price' => $row['unit_price'],
+                        'purchase_price' => $row['purchase_price'] == null ? $row['unit_price'] : $row['purchase_price'],
+                        'unit' => $row['unit'],
+                        //           'current_stock' => $row['current_stock'],
+                        'meta_title' => $row['meta_title'],
+                        'meta_description' => $row['meta_description'],
+                        'colors' => json_encode(array()),
+                        'choice_options' => json_encode(array()),
+                        'variations' => json_encode(array()),
+                        'slug' => preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $row['slug'])) . '-' . Str::random(5),
+                        'thumbnail_img' => $this->downloadThumbnail($row['thumbnail_img']),
+            ]);
+            ProductStock::create([
+                'product_id' => $productId->id,
+                'qty' => $row['current_stock'],
+                'price' => $row['unit_price'],
+                'variant' => '',
+            ]);
+        }
     }
+//    public function model(array $row)
+//    {
+//        return new Product([
+//           'name'     => $row['name'],
+//           'added_by'    => Auth::user()->user_type == 'seller' ? 'seller' : 'admin',
+//           'user_id'    => Auth::user()->user_type == 'seller' ? Auth::user()->id : User::where('user_type', 'admin')->first()->id,
+//           'category_id'    => $row['category_id'],
+//           'brand_id'    => $row['brand_id'],
+//           'video_provider'    => $row['video_provider'],
+//           'video_link'    => $row['video_link'],
+//           'unit_price'    => $row['unit_price'],
+//           'purchase_price'    => $row['purchase_price'] == null ? $row['unit_price'] : $row['purchase_price'],
+//           'unit'    => $row['unit'],
+////           'current_stock' => $row['current_stock'],
+//           'meta_title' => $row['meta_title'],
+//           'meta_description' => $row['meta_description'],
+//           'colors' => json_encode(array()),
+//           'choice_options' => json_encode(array()),
+//           'variations' => json_encode(array()),
+//           'slug' => preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $row['slug'])).'-'.Str::random(5),
+//           'thumbnail_img' => $this->downloadThumbnail($row['thumbnail_img']),
+//        ]);
+//    }
 
     public function rules(): array
     {

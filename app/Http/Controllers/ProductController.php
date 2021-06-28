@@ -24,7 +24,7 @@ class ProductController extends Controller
      */
     public function admin_products(Request $request)
     {
-        ////CoreComponentRepository::instantiateShopRepository();
+        //CoreComponentRepository::instantiateShopRepository();
 
         $type = 'In House';
         $col_name = null;
@@ -188,6 +188,13 @@ class ProductController extends Controller
         $product->discount_type = $request->discount_type;
         $product->shipping_type = $request->shipping_type;
         $product->est_shipping_days = $request->est_shipping_days;
+
+        if (\App\Addon::where('unique_identifier', 'club_point')->first() != null &&
+            \App\Addon::where('unique_identifier', 'club_point')->first()->activated) {
+            if ($request->earn_point) {
+                $product->earn_point = $request->earn_point;
+            }
+        }
 
         if ($request->has('shipping_type')) {
             if ($request->shipping_type == 'free') {
@@ -411,6 +418,10 @@ class ProductController extends Controller
     public function admin_product_edit(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        if ($product->digital == 1) {
+            return redirect('digitalproducts/' . $id . '/edit');
+        }
+
         $lang = $request->lang;
         $tags = json_decode($product->tags);
         $categories = Category::where('parent_id', 0)
@@ -429,6 +440,9 @@ class ProductController extends Controller
     public function seller_product_edit(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        if ($product->digital == 1) {
+            return redirect('digitalproducts/' . $id . '/edit');
+        }
         $lang = $request->lang;
         $tags = json_decode($product->tags);
         $categories = Category::all();
@@ -494,6 +508,14 @@ class ProductController extends Controller
         $product->discount = $request->discount;
         $product->shipping_type = $request->shipping_type;
         $product->est_shipping_days = $request->est_shipping_days;
+
+        if (\App\Addon::where('unique_identifier', 'club_point')->first() != null &&
+            \App\Addon::where('unique_identifier', 'club_point')->first()->activated) {
+            if ($request->earn_point) {
+                $product->earn_point = $request->earn_point;
+            }
+        }
+
         if ($request->has('shipping_type')) {
             if ($request->shipping_type == 'free') {
                 $product->shipping_cost = 0;
@@ -713,6 +735,17 @@ class ProductController extends Controller
             flash(translate('Something went wrong'))->error();
             return back();
         }
+    }
+
+    public function bulk_product_delete(Request $request)
+    {
+        if ($request->id) {
+            foreach ($request->id as $product_id) {
+                $this->destroy($product_id);
+            }
+        }
+
+        return 1;
     }
 
     /**

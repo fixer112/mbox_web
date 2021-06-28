@@ -71,16 +71,22 @@ class OrderController extends Controller
 
         $date = $request->date;
         $sort_search = null;
+        $delivery_status = null;
+
         $orders = Order::orderBy('code', 'desc');
         if ($request->has('search')) {
             $sort_search = $request->search;
             $orders = $orders->where('code', 'like', '%' . $sort_search . '%');
         }
+        if ($request->delivery_status != null) {
+            $orders = $orders->where('delivery_status', $request->delivery_status);
+            $delivery_status = $request->delivery_status;
+        }
         if ($date != null) {
             $orders = $orders->where('created_at', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])))->where('created_at', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])));
         }
         $orders = $orders->paginate(15);
-        return view('backend.sales.all_orders.index', compact('orders', 'sort_search', 'date'));
+        return view('backend.sales.all_orders.index', compact('orders', 'sort_search', 'delivery_status', 'date'));
     }
 
     public function all_orders_show($id)
@@ -329,7 +335,7 @@ class OrderController extends Controller
                     flash(translate('The requested quantity is not available for ') . $product->getTranslation('name'))->warning();
                     $order->delete();
                     return redirect()->route('cart')->send();
-                } else {
+                } elseif ($product->digital != 1) {
                     $product_stock->qty -= $cartItem['quantity'];
                     $product_stock->save();
                 }
@@ -488,6 +494,17 @@ class OrderController extends Controller
         return back();
     }
 
+    public function bulk_order_delete(Request $request)
+    {
+        if ($request->id) {
+            foreach ($request->id as $order_id) {
+                $this->destroy($order_id);
+            }
+        }
+
+        return 1;
+    }
+
     public function order_details(Request $request)
     {
         $order = Order::findOrFail($request->order_id);
@@ -577,6 +594,21 @@ class OrderController extends Controller
 
         return 1;
     }
+
+//    public function bulk_order_status(Request $request) {
+    ////        dd($request->all());
+    //        if($request->id) {
+    //            foreach ($request->id as $order_id) {
+    //                $order = Order::findOrFail($order_id);
+    //                $order->delivery_viewed = '0';
+    //                $order->save();
+    //
+    //                $this->change_status($order, $request);
+    //            }
+    //        }
+    //
+    //        return 1;
+    //    }
 
     public function update_payment_status(Request $request)
     {

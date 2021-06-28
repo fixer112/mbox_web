@@ -37,6 +37,17 @@ class CheckoutController extends Controller
     public function checkout(Request $request)
     {
         if ($request->payment_option != null) {
+            if (\App\Addon::where('unique_identifier', 'otp_system')->first() != null && 
+                    \App\Addon::where('unique_identifier', 'otp_system')->first()->activated && 
+                    !Auth::user()->email) {
+                flash(translate('Your email should be verified before order'))->warning();
+                return redirect()->route('cart')->send();
+            }
+            
+            if(get_setting('email_verification') == 1 && !Auth::user()->hasVerifiedEmail()) {
+                flash(translate('Your email should be verified before order'))->warning();
+                return redirect()->route('cart')->send();
+            }
 
             $orderController = new OrderController;
             $orderController->store($request);
@@ -177,10 +188,12 @@ class CheckoutController extends Controller
                     
                     if (get_setting('product_manage_by_admin') == 1) {
                         $seller_earning = ($orderDetail->tax + $orderDetail->price) - $admin_commission;
-                        $seller->admin_to_pay = $seller->admin_to_pay + ($orderDetail->tax + $orderDetail->price) - $admin_commission;
+                        //$seller->admin_to_pay = $seller->admin_to_pay + ($orderDetail->tax + $orderDetail->price) - $admin_commission;
+                        $seller->admin_to_pay += $seller_earning;
                     } else {
-                        $seller_earning = $orderDetail->tax + $orderDetail->shipping_cost + $orderDetail->price - $admin_commission;
-                        $seller->admin_to_pay = $seller->admin_to_pay - $admin_commission;
+                        $seller_earning = ($orderDetail->tax + $orderDetail->shipping_cost + $orderDetail->price) - $admin_commission;
+                        // $seller->admin_to_pay = $seller->admin_to_pay - $admin_commission;
+                        $seller->admin_to_pay += $seller_earning;
                     }
 //                    $seller->admin_to_pay = $seller->admin_to_pay + ($orderDetail->price * (100 - $commission_percentage)) / 100 + $orderDetail->tax + $orderDetail->shipping_cost;
                     $seller->save();

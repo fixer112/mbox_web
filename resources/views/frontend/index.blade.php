@@ -16,7 +16,7 @@
 
                 <div class="@if($num_todays_deal > 0) col-lg-7 @else col-lg-9 @endif">
                     @if (get_setting('home_slider_images') != null)
-                        <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true" data-autoplay="true" data-infinite="true">
+                        <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true" data-autoplay="true">
                             @php $slider_images = json_decode(get_setting('home_slider_images'), true);  @endphp
                             @foreach ($slider_images as $key => $value)
                                 <div class="carousel-box">
@@ -147,57 +147,14 @@
                     <a href="{{ route('flash-deal-details', $flash_deal->slug) }}" class="ml-auto mr-0 btn btn-primary btn-sm shadow-md w-100 w-md-auto">{{ translate('View More') }}</a>
                 </div>
 
-                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5" data-lg-items="4"  data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true' data-infinite='true'>
+                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5" data-lg-items="4"  data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true'>
                     @foreach ($flash_deal->flash_deal_products as $key => $flash_deal_product)
                         @php
                             $product = \App\Product::find($flash_deal_product->product_id);
                         @endphp
                         @if ($product != null && $product->published != 0)
                             <div class="carousel-box">
-                                <div class="aiz-card-box border border-light rounded hov-shadow-md my-2 has-transition">
-                                    <div class="position-relative">
-                                        <a href="{{ route('product', $product->slug) }}" class="d-block">
-                                            <img
-                                                class="img-fit lazyload mx-auto h-140px h-md-210px"
-                                                src="{{ static_asset('assets/img/placeholder.jpg') }}"
-                                                data-src="{{ uploaded_asset($product->thumbnail_img) }}"
-                                                alt="{{  $product->getTranslation('name')  }}"
-                                                onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
-                                            >
-                                        </a>
-                                        <div class="absolute-top-right aiz-p-hov-icon">
-                                            <a href="javascript:void(0)" onclick="addToWishList({{ $product->id }})" data-toggle="tooltip" data-title="{{ translate('Add to wishlist') }}" data-placement="left">
-                                                <i class="la la-heart-o"></i>
-                                            </a>
-                                            <a href="javascript:void(0)" onclick="addToCompare({{ $product->id }})" data-toggle="tooltip" data-title="{{ translate('Add to compare') }}" data-placement="left">
-                                                <i class="las la-sync"></i>
-                                            </a>
-                                            <a href="javascript:void(0)" onclick="showAddToCartModal({{ $product->id }})" data-toggle="tooltip" data-title="{{ translate('Add to cart') }}" data-placement="left">
-                                                <i class="las la-shopping-cart"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="p-md-3 p-2 text-left">
-                                        <div class="fs-15">
-                                            @if(home_base_price($product->id) != home_discounted_base_price($product->id))
-                                                <del class="fw-600 opacity-50 mr-1">{{ home_base_price($product->id) }}</del>
-                                            @endif
-                                            <span class="fw-700 text-primary">{{ home_discounted_base_price($product->id) }}</span>
-                                        </div>
-                                        <div class="rating rating-sm mt-1">
-                                            {{ renderStarRating($product->rating) }}
-                                        </div>
-                                        <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
-                                            <a href="{{ route('product', $product->slug) }}" class="d-block text-reset">{{  $product->getTranslation('name')  }}</a>
-                                        </h3>
-                                        @if (\App\Addon::where('unique_identifier', 'club_point')->first() != null && \App\Addon::where('unique_identifier', 'club_point')->first()->activated)
-                                            <div class="rounded px-2 mt-2 bg-soft-primary border-soft-primary border">
-                                                {{ translate('Club Point') }}:
-                                                <span class="fw-700 float-right">{{ $product->earn_point }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
+                                @include('frontend.partials.product_box_1',['product' => $product])
                             </div>
                         @endif
                     @endforeach
@@ -259,7 +216,7 @@
                                 </h3>
                                 <a href="{{ route('customer.products') }}" class="ml-auto mr-0 btn btn-primary btn-sm shadow-md">{{ translate('View More') }}</a>
                             </div>
-                           <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5" data-lg-items="4"  data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true' data-infinite='true'>
+                           <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5" data-lg-items="4"  data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true'>
                                @foreach ($classified_products as $key => $classified_product)
                                    <div class="carousel-box">
                                         <div class="aiz-card-box border border-light rounded hov-shadow-md my-2 has-transition">
@@ -353,7 +310,7 @@
                                                         data-src="{{ uploaded_asset($category->banner) }}"
                                                         alt="{{ $category->getTranslation('name') }}"
                                                         class="img-fluid img lazyload h-60px"
-                                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
                                                     >
                                                 </div>
                                                 <div class="col-7">
@@ -392,7 +349,7 @@
                                                         data-src="{{ uploaded_asset($brand->logo) }}"
                                                         alt="{{ $brand->getTranslation('name') }}"
                                                         class="img-fluid img lazyload h-60px"
-                                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
+                                                        onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';"
                                                     >
                                                 </div>
                                                 <div class="col-6">

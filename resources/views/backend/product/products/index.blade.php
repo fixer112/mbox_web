@@ -21,9 +21,19 @@
 <div class="card">
     <form class="" id="sort_products" action="" method="GET">
         <div class="card-header row gutters-5">
-            <div class="col text-center text-md-left">
+            <div class="col">
                 <h5 class="mb-md-0 h6">{{ translate('All Product') }}</h5>
             </div>
+            
+            <div class="dropdown mb-2 mb-md-0">
+                <button class="btn border dropdown-toggle" type="button" data-toggle="dropdown">
+                    {{translate('Bulk Action')}}
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#" onclick="bulk_delete()"> {{translate('Delete selection')}}</a>
+                </div>
+            </div>
+            
             @if($type == 'Seller')
             <div class="col-md-2 ml-auto">
                 <select class="form-control form-control-sm aiz-selectpicker mb-2 mb-md-0" id="user_id" name="user_id" onchange="sort_products()">
@@ -63,30 +73,48 @@
                 </div>
             </div>
         </div>
-    </form>
+    
         <div class="card-body">
             <table class="table aiz-table mb-0">
                 <thead>
                     <tr>
-                        <th data-breakpoints="lg">#</th>
-                        <th width="30%">{{translate('Name')}}</th>
+                        <th>
+                            <div class="form-group">
+                                <div class="aiz-checkbox-inline">
+                                    <label class="aiz-checkbox">
+                                        <input type="checkbox" class="check-all">
+                                        <span class="aiz-square-check"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </th>
+                        <!--<th data-breakpoints="lg">#</th>-->
+                        <th>{{translate('Name')}}</th>
                         @if($type == 'Seller' || $type == 'All')
                             <th data-breakpoints="lg">{{translate('Added By')}}</th>
                         @endif
-                        <th data-breakpoints="lg">{{translate('Info')}}</th>
-                        <th data-breakpoints="lg">{{translate('Total Stock')}}</th>
+                        <th data-breakpoints="sm">{{translate('Info')}}</th>
+                        <th data-breakpoints="md">{{translate('Total Stock')}}</th>
                         <th data-breakpoints="lg">{{translate('Todays Deal')}}</th>
                         <th data-breakpoints="lg">{{translate('Published')}}</th>
                         <th data-breakpoints="lg">{{translate('Featured')}}</th>
-                        <th data-breakpoints="lg" class="text-right">{{translate('Options')}}</th>
+                        <th data-breakpoints="sm" class="text-right">{{translate('Options')}}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($products as $key => $product)
                     <tr>
-                        <td>{{ ($key+1) + ($products->currentPage() - 1)*$products->perPage() }}</td>
+                        <!--<td>{{ ($key+1) + ($products->currentPage() - 1)*$products->perPage() }}</td>-->
                         <td>
-                            <div class="row gutters-5">
+                            <div class="form-group d-inline-block">
+                                <label class="aiz-checkbox">
+                                    <input type="checkbox" class="check-one" name="id[]" value="{{$product->id}}">
+                                    <span class="aiz-square-check"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row gutters-5 w-200px w-md-300px mw-100">
                                 <div class="col-auto">
                                     <img src="{{ uploaded_asset($product->thumbnail_img)}}" alt="Image" class="size-50px img-fit">
                                 </div>
@@ -114,7 +142,7 @@
                                 }
                                 else {
                                     //$qty = $product->current_stock;
-                                    $qty = $product->stocks->first()->qty;
+                                    $qty = optional($product->stocks->first())->qty;
                                     echo $qty;
                                 }
                             @endphp
@@ -168,6 +196,7 @@
                 {{ $products->appends(request()->input())->links() }}
             </div>
         </div>
+    </form>
 </div>
 
 @endsection
@@ -179,6 +208,20 @@
 
 @section('script')
     <script type="text/javascript">
+        
+        $(document).on("change", ".check-all", function() {
+            if(this.checked) {
+                // Iterate each checkbox
+                $(':checkbox').each(function() {
+                    this.checked = true;                        
+                });
+            } else {
+                $(':checkbox').each(function() {
+                    this.checked = false;                       
+                });
+            }
+          
+        });
 
         $(document).ready(function(){
             //$('#container').removeClass('mainnav-lg').addClass('mainnav-sm');
@@ -237,6 +280,26 @@
 
         function sort_products(el){
             $('#sort_products').submit();
+        }
+        
+        function bulk_delete() {
+            var data = new FormData($('#sort_products')[0]);
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{route('bulk-product-delete')}}",
+                type: 'POST',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if(response == 1) {
+                        location.reload();
+                    }
+                }
+            });
         }
 
     </script>

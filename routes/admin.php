@@ -37,10 +37,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::post('/products/todays_deal', 'ProductController@updateTodaysDeal')->name('products.todays_deal');
     Route::post('/products/featured', 'ProductController@updateFeatured')->name('products.featured');
     Route::post('/products/get_products_by_subcategory', 'ProductController@get_products_by_subcategory')->name('products.get_products_by_subcategory');
-
+    Route::post('/bulk-product-delete', 'ProductController@bulk_product_delete')->name('bulk-product-delete');
+    
     Route::resource('sellers', 'SellerController');
     Route::get('sellers_ban/{id}', 'SellerController@ban')->name('sellers.ban');
     Route::get('/sellers/destroy/{id}', 'SellerController@destroy')->name('sellers.destroy');
+    Route::post('/bulk-seller-delete', 'SellerController@bulk_seller_delete')->name('bulk-seller-delete');
     Route::get('/sellers/view/{id}/verification', 'SellerController@show_verification_request')->name('sellers.show_verification_request');
     Route::get('/sellers/approve/{id}', 'SellerController@approve_seller')->name('sellers.approve');
     Route::get('/sellers/reject/{id}', 'SellerController@reject_seller')->name('sellers.reject');
@@ -53,7 +55,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('customers_ban/{customer}', 'CustomerController@ban')->name('customers.ban');
     Route::get('/customers/login/{id}', 'CustomerController@login')->name('customers.login');
     Route::get('/customers/destroy/{id}', 'CustomerController@destroy')->name('customers.destroy');
-
+    Route::post('/bulk-customer-delete', 'CustomerController@bulk_customer_delete')->name('bulk-customer-delete');
+    
     Route::get('/newsletter', 'NewsletterController@index')->name('newsletters.index');
     Route::post('/newsletter/send', 'NewsletterController@send')->name('newsletters.send');
     Route::post('/newsletter/test/smtp', 'NewsletterController@testEmail')->name('test.smtp');
@@ -155,12 +158,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::get('/seller_orders', 'OrderController@seller_orders')->name('seller_orders.index');
     Route::get('/seller_orders/{id}/show', 'OrderController@seller_orders_show')->name('seller_orders.show');
 
+    Route::post('/bulk-order-status', 'OrderController@bulk_order_status')->name('bulk-order-status');
+    
+    
     // Pickup point orders
     Route::get('orders_by_pickup_point', 'OrderController@pickup_point_order_index')->name('pick_up_point.order_index');
     Route::get('/orders_by_pickup_point/{id}/show', 'OrderController@pickup_point_order_sales_show')->name('pick_up_point.order_show');
 
     Route::get('/orders/destroy/{id}', 'OrderController@destroy')->name('orders.destroy');
-
+    Route::post('/bulk-order-delete', 'OrderController@bulk_order_delete')->name('bulk-order-delete');
+    
     Route::post('/pay_to_seller', 'CommissionController@pay_to_seller')->name('commissions.pay_to_seller');
 
     //Reports

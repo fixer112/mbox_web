@@ -47,7 +47,7 @@ class CheckForMaintenanceMode
     public function handle($request, Closure $next)
     {
         if ($this->app->isDownForMaintenance()){
-            if((Auth::check() && Auth::user()->user_type == 'admin') || $this->inExceptArray($request)) {
+            if((Auth::check() && Auth::user()->user_type == 'admin') || (Auth::check() && Auth::user()->user_type == 'staff') || $this->inExceptArray($request)) {
                 return $next($request);
             }
             else {

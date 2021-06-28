@@ -43,6 +43,16 @@
                                         @php echo get_setting('about_us_description'); @endphp
                                     </textarea>
     							</div>
+                                <div class="form-group">
+                                    <label>{{ translate('Play Store Link') }}</label>
+                                    <input type="hidden" name="types[]" value="play_store_link">
+                                    <input type="text" class="form-control" placeholder="http://" name="play_store_link" value="{{ get_setting('play_store_link') }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ translate('App Store Link') }}</label>
+                                    <input type="hidden" name="types[]" value="app_store_link">
+                                    <input type="text" class="form-control" placeholder="http://" name="app_store_link" value="{{ get_setting('app_store_link') }}">
+                                </div>
     							<div class="text-right">
     								<button type="submit" class="btn btn-primary">{{ translate('Update') }}</button>
     							</div>

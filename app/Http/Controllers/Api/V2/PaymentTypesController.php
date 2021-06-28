@@ -17,7 +17,7 @@ class PaymentTypesController
 
         $payment_types = array();
 
-        if ( get_setting('paypal_payment' == 1)) {
+        if ( get_setting('paypal_payment') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'paypal_payment';
             $payment_type['payment_type_key'] = 'paypal';
@@ -31,7 +31,7 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
-        if (get_setting('stripe_payment' == 1)) {
+        if (get_setting('stripe_payment') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'stripe_payment';
             $payment_type['payment_type_key'] = 'stripe';
@@ -45,7 +45,7 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
-        if (get_setting('razorpay' == 1)) {
+        if (get_setting('razorpay') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'razorpay';
             $payment_type['payment_type_key'] = 'razorpay';
@@ -59,7 +59,7 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
-        if (get_setting('bkash' == 1)) {
+        if (get_setting('bkash') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'bkash';
             $payment_type['payment_type_key'] = 'bkash';
@@ -73,7 +73,7 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
-        if (get_setting('nagad' == 1)) {
+        if (get_setting('nagad') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'nagad';
             $payment_type['payment_type_key'] = 'bkash';
@@ -87,7 +87,7 @@ class PaymentTypesController
             $payment_types[] = $payment_type;
         }
 
-        if (get_setting('sslcommerz_payment' == 1)) {
+        if (get_setting('sslcommerz_payment') == 1) {
             $payment_type = array();
             $payment_type['payment_type'] = 'sslcommerz_payment';
             $payment_type['payment_type_key'] = 'sslcommerz';
@@ -103,7 +103,7 @@ class PaymentTypesController
 
         // you cannot recharge wallet by wallet or cash payment
         if($mode != 'wallet') {
-            if ( get_setting('wallet_system' == 1)) {
+            if ( get_setting('wallet_system') == 1) {
                 $payment_type = array();
                 $payment_type['payment_type'] = 'wallet_system';
                 $payment_type['payment_type_key'] = 'wallet';
@@ -114,7 +114,7 @@ class PaymentTypesController
                 $payment_types[] = $payment_type;
             }
 
-            if ( get_setting('cash_payment' == 1)) {
+            if ( get_setting('cash_payment') == 1) {
                 $payment_type = array();
                 $payment_type['payment_type'] = 'cash_payment';
                 $payment_type['payment_type_key'] = 'cash_on_delivery';

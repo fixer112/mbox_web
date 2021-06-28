@@ -8,7 +8,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\User;
-use App\Notifications\EmailVerificationNotification;
+use App\Notifications\AppEmailVerificationNotification;
 use Hash;
 
 
@@ -43,7 +43,7 @@ class AuthController extends Controller
         if (BusinessSetting::where('type', 'email_verification')->first()->value != 1) {
             $user->email_verified_at = date('Y-m-d H:m:s');
         } elseif ($request->register_by == 'email') {
-            $user->notify(new EmailVerificationNotification());
+            $user->notify(new AppEmailVerificationNotification());
         } else {
             $otpController = new OTPVerificationController();
             $otpController->send_code($user);
@@ -67,7 +67,7 @@ class AuthController extends Controller
         $user->verification_code = rand(100000, 999999);
 
         if ($request->verify_by == 'email') {
-            $user->notify(new EmailVerificationNotification());
+            $user->notify(new AppEmailVerificationNotification());
         } else {
             $otpController = new OTPVerificationController();
             $otpController->send_code($user);
@@ -149,9 +149,6 @@ class AuthController extends Controller
 
     public function socialLogin(Request $request)
     {
-        $request->validate([
-            'email' => 'required|string|email'
-        ]);
         if (User::where('email', $request->email)->first() != null) {
             $user = User::where('email', $request->email)->first();
         } else {

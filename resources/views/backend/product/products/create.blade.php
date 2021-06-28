@@ -60,7 +60,7 @@
                         <div class="form-group row">
                             <label class="col-md-3 col-from-label">{{translate('Tags')}} <span class="text-danger">*</span></label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control aiz-tag-input" name="tags[]" placeholder="{{ translate('Type and hit enter to add a tag') }}" required>
+                                <input type="text" class="form-control aiz-tag-input" name="tags[]" placeholder="{{ translate('Type and hit enter to add a tag') }}">
                                 <small class="text-muted">{{translate('This is used for search. Input those words by which cutomer can find this product.')}}</small>
                             </div>
                         </div>
@@ -217,20 +217,7 @@
                                 <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Purchase price') }}" name="purchase_price" class="form-control" required>
                             </div>
                         </div>-->
-                        {{--
-                        <div class="form-group row">
-                            <label class="col-md-3 col-from-label">{{translate('Tax')}} <span class="text-danger">*</span></label>
-                            <div class="col-md-6">
-                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Tax') }}" name="tax" class="form-control" required>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-control aiz-selectpicker" name="tax_type">
-                                    <option value="amount">{{translate('Flat')}}</option>
-                                    <option value="percent">{{translate('Percent')}}</option>
-                                </select>
-                            </div>
-                        </div>
-                        --}}
+                        
                         <div class="form-group row">
                             <label class="col-md-3 col-from-label">{{translate('Discount')}} <span class="text-danger">*</span></label>
                             <div class="col-md-6">
@@ -243,6 +230,18 @@
                                 </select>
                             </div>
                         </div>
+
+                        @if(\App\Addon::where('unique_identifier', 'club_point')->first() != null && 
+                            \App\Addon::where('unique_identifier', 'club_point')->first()->activated)
+                            <div class="form-group row">
+                                <label class="col-md-3 col-from-label">
+                                    {{translate('Set Point')}} 
+                                </label>
+                                <div class="col-md-6">
+                                    <input type="number" lang="en" min="0" value="0" step="1" placeholder="{{ translate('1') }}" name="earn_point" class="form-control">
+                                </div>
+                            </div>
+                        @endif
                         
                         <div id="show-hide-div">
                             <div class="form-group row">

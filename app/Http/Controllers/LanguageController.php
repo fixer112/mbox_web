@@ -66,6 +66,10 @@ class LanguageController extends Controller
     public function update(Request $request, $id)
     {
         $language = Language::findOrFail($id);
+        if (env('DEFAULT_LANGUAGE') == $language->code) {
+            flash(translate('Default language can not be edited'))->error();
+            return back();
+        }
         $language->name = $request->name;
         $language->code = $request->code;
         if($language->save()){

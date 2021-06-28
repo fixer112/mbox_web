@@ -904,7 +904,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     : buttons;
                 placeholder = !placeholder ? "" : placeholder;
                 minHeight = !minHeight ? 200 : minHeight;
-                format = (typeof format == 'undefined') ? true : format;
+                format = (typeof format == 'undefined') ? false : format;
 
                 $this.summernote({
                     toolbar: buttons,
@@ -1748,9 +1748,42 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             if (!AIZ.extra.getCookie("acceptCookies")) {
                 $(".aiz-cookie-alert").addClass("show");
             }
-            $(".aiz-cookie-accepet").on("click", function() {
+            $(".aiz-cookie-accept").on("click", function() {
                 AIZ.extra.setCookie("acceptCookies", true, 60);
                 $(".aiz-cookie-alert").removeClass("show");
+            });
+        },
+        setSession: function(){
+            $('.set-session').each(function() {
+                var $this = $(this);
+                var key = $this.data('key');
+                var value = $this.data('value');
+
+                const now = new Date();
+                const item = {
+                    value: value,
+                    expiry: now.getTime() + 86400000,
+                };
+
+                $this.on('click', function(){
+                    localStorage.setItem(key, JSON.stringify(item));
+                });
+            });
+        },
+        showSessionPopup: function(){
+            $('.removable-session').each(function() {
+                var $this = $(this);
+                var key = $this.data('key');
+                var value = $this.data('value');
+                var item = {};
+                if (localStorage.getItem(key)) {
+                    item = localStorage.getItem(key);
+                    item = JSON.parse(item);
+                }
+                const now = new Date()
+                if (typeof item.expiry == 'undefined' || now.getTime() > item.expiry){
+                    $this.removeClass('d-none');
+                }
             });
         }
     };
@@ -1779,6 +1812,8 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
     AIZ.extra.hovCategoryMenu();
     AIZ.extra.trimAppUrl();
     AIZ.extra.acceptCookie();
+    AIZ.extra.setSession();
+    AIZ.extra.showSessionPopup()
 
     AIZ.plugins.metismenu();
     AIZ.plugins.bootstrapSelect();

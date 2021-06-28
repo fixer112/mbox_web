@@ -118,6 +118,28 @@ Route::prefix('v2/auth')->group(function () {
 });
 
 Route::prefix('v2')->group(function () {
+
+    Route::prefix('delivery-boy')->group(function () {
+        Route::get('dashboard-summary/{id}', 'Api\V2\DeliveryBoyController@dashboard_summary')->middleware('auth:api');
+        Route::get('deliveries/completed/{id}', 'Api\V2\DeliveryBoyController@completed_delivery')->middleware('auth:api');
+        Route::get('deliveries/cancelled/{id}', 'Api\V2\DeliveryBoyController@cancelled_delivery')->middleware('auth:api');
+        Route::get('deliveries/on_the_way/{id}', 'Api\V2\DeliveryBoyController@on_the_way_delivery')->middleware('auth:api');
+        Route::get('deliveries/picked_up/{id}', 'Api\V2\DeliveryBoyController@picked_up_delivery')->middleware('auth:api');
+        Route::get('deliveries/assigned/{id}', 'Api\V2\DeliveryBoyController@assigned_delivery')->middleware('auth:api');
+        Route::get('collection-summary/{id}', 'Api\V2\DeliveryBoyController@collection_summary')->middleware('auth:api');
+        Route::get('earning-summary/{id}', 'Api\V2\DeliveryBoyController@earning_summary')->middleware('auth:api');
+        Route::get('collection/{id}', 'Api\V2\DeliveryBoyController@collection')->middleware('auth:api');
+        Route::get('earning/{id}', 'Api\V2\DeliveryBoyController@earning')->middleware('auth:api');
+        Route::get('cancel-request/{id}', 'Api\V2\DeliveryBoyController@cancel_request')->middleware('auth:api');
+        Route::post('change-delivery-status', 'Api\V2\DeliveryBoyController@change_delivery_status')->middleware('auth:api');
+    });
+
+    Route::get('chat/conversations/{id}', 'Api\V2\ChatController@conversations')->middleware('auth:api');
+    Route::get('chat/messages/{id}', 'Api\V2\ChatController@messages')->middleware('auth:api');
+    Route::post('chat/insert-message', 'Api\V2\ChatController@insert_message')->middleware('auth:api');
+    Route::get('chat/get-new-messages/{conversation_id}/{last_message_id}', 'Api\V2\ChatController@get_new_messages')->middleware('auth:api');
+    Route::post('chat/create-conversation', 'Api\V2\ChatController@create_conversation')->middleware('auth:api');
+
     Route::apiResource('banners', 'Api\V2\BannerController')->only('index');
 
     Route::get('brands/top', 'Api\V2\BrandController@top');
@@ -240,6 +262,23 @@ Route::prefix('v2')->group(function () {
     Route::any('razorpay/pay-with-razorpay', 'Api\V2\RazorpayController@payWithRazorpay')->name('api.razorpay.payment');
     Route::any('razorpay/payment', 'Api\V2\RazorpayController@payment')->name('api.razorpay.payment');
     Route::post('razorpay/success', 'Api\V2\RazorpayController@success')->name('api.razorpay.success');
+
+    Route::get('bkash/begin', 'Api\V2\BkashController@begin')->middleware('auth:api');
+    Route::get('bkash/api/webpage/{token}/{amount}', 'Api\V2\BkashController@webpage')->name('api.bkash.webpage');
+    Route::any('bkash/api/checkout/{token}/{amount}', 'Api\V2\BkashController@checkout')->name('api.bkash.checkout');
+    Route::any('bkash/api/execute/{token}', 'Api\V2\BkashController@execute')->name('api.bkash.execute');
+    Route::any('bkash/api/fail', 'Api\V2\BkashController@fail')->name('api.bkash.fail');
+    Route::any('bkash/api/success', 'Api\V2\BkashController@success')->name('api.bkash.success');
+    Route::post('bkash/api/process', 'Api\V2\BkashController@process')->name('api.bkash.process');
+
+    Route::get('nagad/begin', 'Api\V2\NagadController@begin')->middleware('auth:api');
+    Route::any('nagad/verify/{payment_type}', 'Api\V2\NagadController@verify')->name('app.nagad.callback_url');
+    Route::post('nagad/process', 'Api\V2\NagadController@process');
+
+    Route::get('sslcommerz/begin', 'Api\V2\SslCommerzController@begin');
+    Route::post('sslcommerz/success', 'Api\V2\SslCommerzController@payment_success');
+    Route::post('sslcommerz/fail', 'Api\V2\SslCommerzController@payment_fail');
+    Route::post('sslcommerz/cancel', 'Api\V2\SslCommerzController@payment_cancel');
 
     Route::post('payments/pay/wallet', 'Api\V2\WalletController@processPayment')->middleware('auth:api');
     Route::post('payments/pay/cod', 'Api\V2\PaymentController@cashOnDelivery')->middleware('auth:api');

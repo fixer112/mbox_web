@@ -69,7 +69,7 @@
                         <div class="form-group row">
                             <label class="col-lg-3 col-from-label">{{translate('Tags')}}</label>
                             <div class="col-lg-8">
-                                <input type="text" class="form-control aiz-tag-input" name="tags[]" id="tags" value="{{ $product->tags }}" placeholder="{{ translate('Type to add a tag') }}" data-role="tagsinput" required>
+                                <input type="text" class="form-control aiz-tag-input" name="tags[]" id="tags" value="{{ $product->tags }}" placeholder="{{ translate('Type to add a tag') }}" data-role="tagsinput">
                             </div>
                         </div>
                         @php
@@ -296,11 +296,23 @@
                             </div>
                         </div>
 
+                        @if(\App\Addon::where('unique_identifier', 'club_point')->first() != null && 
+                            \App\Addon::where('unique_identifier', 'club_point')->first()->activated)
+                            <div class="form-group row">
+                                <label class="col-md-3 col-from-label">
+                                    {{translate('Set Point')}} 
+                                </label>
+                                <div class="col-md-6">
+                                    <input type="number" lang="en" min="0" value="{{ $product->earn_point }}" step="1" placeholder="{{ translate('1') }}" name="earn_point" class="form-control">
+                                </div>
+                            </div>
+                        @endif
+
                         <div id="show-hide-div">
                             <div class="form-group row" id="quantity">
                                 <label class="col-lg-3 col-from-label">{{translate('Quantity')}}</label>
                                 <div class="col-lg-6">
-                                    <input type="number" lang="en" value="{{ $product->stocks->first()->qty }}" step="1" placeholder="{{translate('Quantity')}}" name="current_stock" class="form-control" required>
+                                    <input type="number" lang="en" value="{{ optional($product->stocks->first())->qty }}" step="1" placeholder="{{translate('Quantity')}}" name="current_stock" class="form-control" required>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -308,7 +320,7 @@
                                     {{translate('SKU')}}
                                 </label>
                                 <div class="col-md-6">
-                                    <input type="text" placeholder="{{ translate('SKU') }}" value="{{ $product->stocks->first()->sku }}" name="sku" class="form-control">
+                                    <input type="text" placeholder="{{ translate('SKU') }}" value="{{ optional($product->stocks->first())->sku }}" name="sku" class="form-control">
                                 </div>
                             </div>
                         </div>

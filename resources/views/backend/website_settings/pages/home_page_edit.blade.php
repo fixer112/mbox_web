@@ -456,7 +456,7 @@
 						<label class="col-md-2 col-from-label">{{translate('Top Categories (Max 10)')}}</label>
 						<div class="col-md-10">
 							<input type="hidden" name="types[]" value="top10_categories">
-							<select name="top10_categories[]" class="form-control aiz-selectpicker" multiple data-max-options="10" data-live-search="true" data-selected={{ get_setting('top10_categories') }}>
+							<select name="top10_categories[]" class="form-control aiz-selectpicker" multiple data-max-options="10" data-live-search="true" data-selected="{{ get_setting('top10_categories') }}">
 								@foreach (\App\Category::where('parent_id', 0)->with('childrenCategories')->get() as $category)
 									<option value="{{ $category->id }}">{{ $category->getTranslation('name') }}</option>
 									@foreach ($category->childrenCategories as $childCategory)
@@ -470,9 +470,9 @@
 						<label class="col-md-2 col-from-label">{{translate('Top Brands (Max 10)')}}</label>
 						<div class="col-md-10">
 							<input type="hidden" name="types[]" value="top10_brands">
-							<select name="top10_brands[]" class="form-control aiz-selectpicker" multiple data-max-options="10" data-live-search="true">
+							<select name="top10_brands[]" class="form-control aiz-selectpicker" multiple data-max-options="10" data-live-search="true" data-selected="{{ get_setting('top10_brands') }}">
 								@foreach (\App\Brand::all() as $key => $brand)
-									<option value="{{ $brand->id }}" @if(in_array($brand->id, json_decode(get_setting('top10_brands')))) selected @endif>{{ $brand->getTranslation('name') }}</option>
+									<option value="{{ $brand->id }}">{{ $brand->getTranslation('name') }}</option>
 								@endforeach
 							</select>
 						</div>

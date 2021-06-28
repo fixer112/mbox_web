@@ -136,6 +136,16 @@ class CustomerController extends Controller
         flash(translate('Something went wrong'))->error();
         return back();
     }
+    
+    public function bulk_customer_delete(Request $request) {
+        if($request->id) {
+            foreach ($request->id as $customer_id) {
+                $this->destroy($customer_id);
+            }
+        }
+        
+        return 1;
+    }
 
     public function login($id)
     {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Product;
+use App\ProductStock;
 use App\Category;
 use App\ProductTranslation;
 use Storage;
@@ -92,6 +93,14 @@ class DigitalProductController extends Controller
         $product->slug = preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '-', $request->name)).'-'.rand(10000,99999);
 
         if($product->save()){
+            
+            $product_stock              = new ProductStock;
+            $product_stock->product_id  = $product->id;
+            $product_stock->variant     = '';
+            $product_stock->price       = $request->unit_price;
+            $product_stock->sku         = '';
+            $product_stock->qty         = 0;
+            $product_stock->save();
 
             // Product Translations
             $product_translation                = ProductTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE'), 'product_id' => $product->id]);
@@ -194,8 +203,21 @@ class DigitalProductController extends Controller
 
         $product->file_name = $request->file;
 
+        // Delete From Product Stock
+        foreach ($product->stocks as $key => $stock) {
+            $stock->delete();
+        }
+        
         if($product->save()){
-
+            // Insert Into Product Stock
+            $product_stock              = new ProductStock;
+            $product_stock->product_id  = $product->id;
+            $product_stock->variant     = '';
+            $product_stock->price       = $request->unit_price;
+            $product_stock->sku         = '';
+            $product_stock->qty         = 0;
+            $product_stock->save();
+            
             // Product Translations
             $product_translation                = ProductTranslation::firstOrNew(['lang' => $request->lang, 'product_id' => $product->id]);
             $product_translation->name          = $request->name;
